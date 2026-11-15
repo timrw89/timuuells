@@ -1,18 +1,18 @@
 # Earth Space Weather
 
-An Earth-focused space-weather dashboard that reads live solar-wind and geomagnetic data from NOAA SWPC and recent solar events from NASA DONKI.
+An Earth-focused space-weather dashboard that reads recent event notifications from NASA DONKI.
 
 ## Deploy with Vercel
 
 1. Import the repository as a Vercel project and set **Root Directory** to `NASA`.
 2. In **Project Settings → Environment Variables**, add `nasa_api_key` with your NASA API key. Keep it out of HTML, browser JavaScript, and committed files.
-3. Deploy. The page calls the same-origin `/api/space-weather` serverless function; the function reads the key and queries NASA DONKI.
+3. Deploy. The page calls the same-origin `/api/space-weather` serverless function; the function reads the key and queries NASA's DONKI notifications endpoint.
 
-NOAA conditions and forecast data do not require a key. If `nasa_api_key` is not configured, those readings still load, and the recent NASA events section explains that its feed is unavailable.
+The dashboard summarizes NASA-reported flares, coronal mass ejections, and geomagnetic storms. NASA DONKI provides event alerts rather than continuous solar-wind measurements or a Kp forecast.
 
 ## Local development
 
-Run the project with the Vercel CLI so the serverless route is available. In PowerShell, set the key in your local shell and start the dev server:
+Run these commands from the `NASA` folder so the Vercel CLI can find the serverless route. In PowerShell, set the key in your local shell and start the dev server:
 
 ```powershell
 $env:nasa_api_key = "your-key"
