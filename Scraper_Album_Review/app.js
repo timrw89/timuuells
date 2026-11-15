@@ -2,6 +2,7 @@ const refreshButton = document.querySelector('#refresh-button');
 const refreshMessage = document.querySelector('#refresh-message');
 const sourceCards = [...document.querySelectorAll('.source-card')];
 const siteMenu = document.querySelector('#site-menu');
+let initialRefreshAttempted = false;
 
 siteMenu.addEventListener('click', (event) => {
     if (event.target.closest('a')) siteMenu.open = false;
@@ -79,6 +80,9 @@ async function loadReviews() {
 
         if (data.refreshing) {
             window.setTimeout(loadReviews, 1500);
+        } else if (!initialRefreshAttempted && data.sources.every((source) => !source.items?.length)) {
+            initialRefreshAttempted = true;
+            refreshButton.click();
         }
     } catch (error) {
         refreshMessage.textContent = error.message;
