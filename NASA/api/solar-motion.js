@@ -1,5 +1,5 @@
-const FRAME_INTERVAL_MS = 2 * 60 * 60 * 1000;
-const FRAME_COUNT = 13;
+const FRAME_INTERVAL_MS = 60 * 60 * 1000;
+const FRAME_COUNT = 24;
 
 function badRequest(message) {
     return Object.assign(new Error(message), { statusCode: 400 });

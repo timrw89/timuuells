@@ -155,7 +155,7 @@ async function loadSolarAnimation(alert) {
     animationStatus.textContent = `Preparing solar images around the NASA alert from ${alertTime}…`;
     animationCaption.textContent =
         `${alert.title || alert.type} · NASA alert issued ${alertTime}. ` +
-        "The animation covers the 24 hours before that timestamp, in two-hour steps.";
+        "The animation shows 24 hourly images ending at that timestamp.";
 
     if (alert.url) {
         latestAlertLink.href = alert.url;
