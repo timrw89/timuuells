@@ -1,6 +1,6 @@
 # Rhody Scoop
 
-Rhody Scoop collects restaurant stories from Rhode Island Monthly and Fork in the Rhode, plus restaurant listings from OpenTable. Its responsive page is served by an Express app, which fetches the sources on startup and when **Refresh reviews** is clicked. Each source can fail independently, and up to eight entries are shown per source.
+Rhody Scoop collects restaurant stories from Rhode Island Monthly and Fork in the Rhode. Its responsive page is served by an Express app, which fetches the sources on startup and when **Refresh reviews** is clicked. Each source can fail independently, and up to eight entries are shown per source.
 
 ## Run locally
 
@@ -15,10 +15,10 @@ Open [http://localhost:3000](http://localhost:3000). The refresh button is limit
 
 ## Deploy to Vercel
 
-1. Push this folder to a GitHub repository. If it is inside a larger repository, set the Vercel project's **Root Directory** to `Restaraunt Scraper`.
+1. Push this folder to a GitHub repository. If it is inside a larger repository, set the Vercel project's **Root Directory** to `Restaurant Scraper`.
 2. Import the repository in Vercel. Leave the framework preset and build settings on automatic detection; Vercel detects the Express app in `server.js`.
-3. Deploy. Vercel will install dependencies from `package.json`; no environment variables are required.
+3. Deploy. Vercel installs dependencies from `package.json`, serves frontend files from `public/`, and routes API requests to the Express app. No environment variables or custom `vercel.json` are required.
 
-The project serves both the homepage and its API from the same Express app, so the review refresh button works on the deployed site without a separate frontend or CORS setup.
+The `public/` directory contains the static homepage assets. Express also serves that directory during local `npm start`, while Vercel serves those files through its CDN. The review refresh API remains in the Express app, so no separate frontend or CORS setup is needed.
 
-Each publisher controls access to its site and may change its page structure or block automated requests. OpenTable may block automated requests; a source that cannot be fetched is reported in its card while the other sources continue to work. Results are held in server memory and may be refreshed after a new Vercel instance starts.
+Each publisher controls access to its site and may change its page structure or block automated requests. A source that cannot be fetched is reported in its card while the other sources continue to work. Results are held in server memory and may be refreshed after a new Vercel instance starts.

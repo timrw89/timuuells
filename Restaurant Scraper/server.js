@@ -9,6 +9,8 @@ const REFRESH_COOLDOWN_MS = 2 * 60 * 1000;
 const MAX_REVIEWS = 8;
 const PROJECT_DIR = __dirname;
 
+app.use(express.static(path.join(PROJECT_DIR, 'public')));
+
 const sourceDefinitions = [
     {
         id: 'ri-monthly',
@@ -28,14 +30,6 @@ const sourceDefinitions = [
             { url: 'https://forkintherhode.com/category/rhode-island-restaurant-reviews/', type: 'html' }
         ],
     },
-    {
-        id: 'opentable',
-        name: 'OpenTable',
-        host: 'opentable.com',
-        urls: [
-            { url: 'https://www.opentable.com/metro/us/rhode-island-restaurants', type: 'html' }
-        ]
-    }
 ];
 
 const reviewState = sourceDefinitions.map((source) => ({
@@ -100,14 +94,10 @@ function parseHtml(source, html, pageUrl) {
     const $ = cheerio.load(html);
     const reviews = [];
 
-    const cards = source.id === 'opentable'
-        ? $('article, [data-testid*="restaurant"], [class*="restaurant-card"]')
-        : $('article');
-
-    cards.each((_, element) => {
+    $('article').each((_, element) => {
         const card = $(element);
         const titleElement = card.find(
-            '.entry-title a, h2 a, h3 a, h4 a, [data-testid*="restaurant-name"]'
+            '.entry-title a, h2 a, h3 a, h4 a'
         ).first();
         const imageElement = card.find('img').first();
         const imageAnchor = imageElement.closest('a');
@@ -120,23 +110,6 @@ function parseHtml(source, html, pageUrl) {
         );
         if (review) reviews.push(review);
     });
-
-    if (source.id === 'opentable' && !reviews.length) {
-        $('a[href]').each((_, element) => {
-            const anchor = $(element);
-            const imageElement = anchor.find('img').first();
-            if (!imageElement.length) return;
-
-            const review = makeReview(
-                source,
-                anchor.text() || imageElement.attr('alt'),
-                imageFromElement($, imageElement),
-                anchor.attr('href'),
-                pageUrl
-            );
-            if (review) reviews.push(review);
-        });
-    }
 
     return uniqueReviews(reviews);
 }
@@ -237,18 +210,6 @@ function refreshReviews() {
 
     return refreshPromise;
 }
-
-app.get('/', (request, response) => {
-    response.sendFile(path.join(PROJECT_DIR, 'index.html'));
-});
-
-app.get('/styles.css', (request, response) => {
-    response.sendFile(path.join(PROJECT_DIR, 'styles.css'));
-});
-
-app.get('/app.js', (request, response) => {
-    response.sendFile(path.join(PROJECT_DIR, 'app.js'));
-});
 
 app.get('/api/reviews', (request, response) => {
     response.set('Cache-Control', 'no-store');

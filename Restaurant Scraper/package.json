@@ -2,7 +2,7 @@
   "name": "restaurant-scraper",
   "version": "1.0.0",
   "private": true,
-  "description": "A Rhode Island restaurant review and listing aggregator.",
+  "description": "A Rhode Island restaurant review aggregator.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

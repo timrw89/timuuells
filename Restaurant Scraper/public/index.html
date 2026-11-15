@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Restaurant reviews and listings from across Rhode Island.">
+    <meta name="description" content="Restaurant reviews from across Rhode Island.">
     <title>Rhody Scoop — Rhode Island Restaurant Reviews</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,14 +19,13 @@
         <nav class="site-menu-links" aria-label="Restaurant review websites">
             <a href="#ri-monthly">Rhode Island Monthly</a>
             <a href="#fork-in-the-rhode">Fork in the Rhode</a>
-            <a href="#opentable">OpenTable</a>
         </nav>
     </details>
 
     <header class="site-header">
         <p class="eyebrow">The latest from Rhode Island’s tables</p>
         <h1>Rhody Scoop</h1>
-        <p class="tagline">Restaurant reviews and listings from across Rhode Island</p>
+        <p class="tagline">Restaurant reviews from across Rhode Island</p>
         <button class="refresh-button" id="refresh-button" type="button">
             Refresh reviews
         </button>
@@ -52,17 +51,6 @@
             </header>
             <div class="reviews-grid" aria-live="polite">
                 <p class="card-message">Fetching restaurant posts…</p>
-            </div>
-            <p class="source-status"></p>
-        </section>
-
-        <section class="source-card" id="opentable" data-source="opentable">
-            <header class="source-header">
-                <h2>OpenTable Rhode Island</h2>
-                <a href="https://www.opentable.com/metro/us/rhode-island-restaurants" target="_blank" rel="noopener noreferrer">Visit site</a>
-            </header>
-            <div class="reviews-grid" aria-live="polite">
-                <p class="card-message">Fetching restaurant listings…</p>
             </div>
             <p class="source-status"></p>
         </section>

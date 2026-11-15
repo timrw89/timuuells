@@ -1,8 +1,16 @@
 :root {
-    color-scheme: dark;
+    color-scheme: light;
     font-family: Arial, Helvetica, sans-serif;
-    background: #111;
-    color: #f5f2ee;
+    background: #eaf3f3;
+    color: #193d4a;
+    --ocean-deep: #174e5d;
+    --ocean: #287c89;
+    --ocean-soft: #dceff0;
+    --sand: #fff8ec;
+    --sunset: #bd654e;
+    --ink: #193d4a;
+    --muted: #58727b;
+    --line: #d7e5e6;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
 }
@@ -19,7 +27,9 @@ body {
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
-    background: linear-gradient(145deg, #777 0%, #5f2828 34%, #003500 70%, #080808 100%);
+    background:
+        radial-gradient(ellipse at 82% 4%, rgb(247 204 171 / 54%), transparent 29rem),
+        linear-gradient(180deg, #d9edf1 0%, #eff5f1 48%, var(--sand) 100%);
 }
 
 .site-menu {
@@ -35,11 +45,11 @@ body {
     min-height: 2.75rem;
     place-items: center;
     padding: 0;
-    border: 1px solid #d5c6b4;
-    border-radius: .25rem;
-    background: linear-gradient(160deg, #39302b, #211b19 70%);
-    box-shadow: 0 .3rem .65rem rgb(0 0 0 / 28%), inset 0 1px rgb(255 255 255 / 12%);
-    color: #f5f2ee;
+    border: 1px solid #c8dcde;
+    border-radius: .8rem;
+    background: rgb(255 255 255 / 92%);
+    box-shadow: 0 .25rem .75rem rgb(23 78 93 / 12%);
+    color: var(--ocean-deep);
     cursor: pointer;
     list-style: none;
     transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
@@ -93,14 +103,14 @@ body {
 
 .site-menu-toggle:hover,
 .site-menu-toggle:focus-visible {
-    background: linear-gradient(160deg, #594034, #49332a 70%);
-    box-shadow: 0 .45rem .8rem rgb(0 0 0 / 35%), inset 0 1px rgb(255 255 255 / 16%);
+    background: #fff;
+    box-shadow: 0 .4rem .9rem rgb(23 78 93 / 18%);
     transform: translateY(-2px);
 }
 
 .site-menu-toggle:focus-visible,
 .site-menu-links a:focus-visible {
-    outline: 3px solid #d5c6b4;
+    outline: 3px solid #d98b71;
     outline-offset: 3px;
 }
 
@@ -111,21 +121,20 @@ body {
     display: grid;
     width: min(15rem, calc(100vw - 1.5rem));
     padding: .4rem;
-    border: 2px solid #514d47;
-    border-radius: .35rem 1rem .35rem .35rem;
-    background: linear-gradient(145deg, #b4aea4, #77736c 72%, #625e58);
-    box-shadow: 0 .75rem 1.25rem rgb(0 0 0 / 45%), inset 0 1px rgb(255 255 255 / 40%);
+    border: 1px solid var(--line);
+    border-radius: .85rem;
+    background: #fffefa;
+    box-shadow: 0 .75rem 1.5rem rgb(23 78 93 / 18%);
 }
 
 .site-menu-links a {
     padding: .7rem .75rem;
-    border-bottom: 1px solid rgb(45 42 38 / 25%);
-    color: #211f1c;
-    font-family: 'IM Fell English SC', Georgia, serif;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    font-family: inherit;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 600;
     text-decoration: none;
-    text-shadow: 0 1px rgb(255 255 255 / 35%);
 }
 
 .site-menu-links a:last-child {
@@ -134,8 +143,8 @@ body {
 
 .site-menu-links a:hover,
 .site-menu-links a:focus-visible {
-    border-radius: .2rem;
-    background: rgb(255 255 255 / 16%);
+    border-radius: .45rem;
+    background: var(--ocean-soft);
 }
 
 .site-header {
@@ -150,8 +159,9 @@ body {
 
 .eyebrow {
     margin: 0 0 .25rem;
-    color: #ddd;
+    color: var(--sunset);
     font-size: .75rem;
+    font-weight: 700;
     letter-spacing: .16em;
     text-transform: uppercase;
 }
@@ -161,32 +171,34 @@ body {
     font-family: 'IM Fell English SC', Georgia, serif;
     font-size: clamp(3.5rem, 14vw, 5rem);
     line-height: 1;
-    text-shadow: 0 .12em .08em rgb(0 0 0 / 35%);
+    color: var(--ocean-deep);
+    text-shadow: 0 2px 0 rgb(255 255 255 / 55%);
 }
 
 .tagline {
     margin: .5rem 0 1.25rem;
-    font-family: 'IM Fell English SC', Georgia, serif;
+    color: var(--muted);
     font-size: 1.1rem;
 }
 
 .refresh-button {
     min-height: 2.75rem;
     padding: .65rem 1.1rem;
-    border: 1px solid #d5c6b4;
-    border-radius: .25rem;
-    background: linear-gradient(160deg, #39302b, #211b19 70%);
+    border: 1px solid var(--ocean-deep);
+    border-radius: .75rem;
+    background: var(--ocean);
     color: #fff;
     cursor: pointer;
     font: inherit;
-    box-shadow: 0 .3rem .65rem rgb(0 0 0 / 28%), inset 0 1px rgb(255 255 255 / 12%);
+    font-weight: 700;
+    box-shadow: 0 .25rem .75rem rgb(23 78 93 / 20%);
     transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
 .refresh-button:hover:not(:disabled),
 .refresh-button:focus-visible {
-    background: linear-gradient(160deg, #594034, #49332a 70%);
-    box-shadow: 0 .45rem .8rem rgb(0 0 0 / 35%), inset 0 1px rgb(255 255 255 / 16%);
+    background: var(--ocean-deep);
+    box-shadow: 0 .45rem 1rem rgb(23 78 93 / 24%);
     transform: translateY(-2px);
 }
 
@@ -198,7 +210,7 @@ body {
 .refresh-message {
     min-height: 1.25rem;
     margin: .5rem 0 0;
-    color: #eee;
+    color: var(--muted);
     font-size: .875rem;
 }
 
@@ -214,18 +226,18 @@ body {
 .source-card {
     scroll-margin-top: 1rem;
     min-width: 0;
-    padding: 1rem;
-    border: 4px double #777;
-    border-radius: 2.5rem .5rem;
-    background: linear-gradient(145deg, #fbf8f3 0%, #d3ceca 58%, #aaa39e 100%);
-    color: #171412;
-    box-shadow: 0 1rem 2rem rgb(0 0 0 / 30%), 0 .2rem .35rem rgb(0 0 0 / 22%), inset 0 1px rgb(255 255 255 / 70%);
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: 1.25rem;
+    background: rgb(255 255 255 / 94%);
+    color: var(--ink);
+    box-shadow: 0 .5rem 1.5rem rgb(23 78 93 / 10%);
     transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
 .source-card:hover {
-    box-shadow: 0 1.25rem 2.25rem rgb(0 0 0 / 36%), 0 .25rem .4rem rgb(0 0 0 / 25%), inset 0 1px rgb(255 255 255 / 70%);
-    transform: translateY(-3px);
+    box-shadow: 0 .8rem 1.8rem rgb(23 78 93 / 14%);
+    transform: translateY(-2px);
 }
 
 .source-header {
@@ -239,60 +251,81 @@ body {
 
 .source-header h2 {
     margin: 0;
-    font-family: 'IM Fell English SC', Georgia, serif;
-    font-size: clamp(1.25rem, 5vw, 1.8rem);
+    color: var(--ocean-deep);
+    font-size: clamp(1.15rem, 4vw, 1.45rem);
     line-height: 1.15;
 }
 
 .source-header a {
     flex: 0 0 auto;
-    color: #542424;
+    color: var(--ocean);
     font-size: .8rem;
     font-weight: 700;
+}
+
+.source-header a:hover {
+    color: var(--sunset);
+}
+
+.source-header a:focus-visible {
+    border-radius: .2rem;
+    outline: 3px solid #d98b71;
+    outline-offset: 3px;
 }
 
 .reviews-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: .75rem;
+    gap: .85rem;
 }
 
 .review-tile {
     display: flex;
     min-width: 0;
     flex-direction: column;
-    gap: .45rem;
-    color: #161313;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: .85rem;
+    background: #fff;
+    color: var(--ink);
     text-decoration: none;
+    box-shadow: 0 .2rem .6rem rgb(23 78 93 / 7%);
+    transition: transform 180ms ease, box-shadow 180ms ease;
 }
 
 .review-artwork {
     display: block;
     width: 100%;
     aspect-ratio: 1;
-    border-radius: .25rem;
-    background: linear-gradient(135deg, #302a29, #6a3e3b);
+    background: linear-gradient(135deg, #d7e9e7, #f1dfca);
     object-fit: cover;
-    box-shadow: 0 .3rem .65rem rgb(27 20 17 / 30%), inset 0 1px rgb(255 255 255 / 20%);
-    transition: transform 180ms ease, box-shadow 180ms ease;
+    transition: filter 180ms ease;
 }
 
 .review-tile:hover .review-artwork,
 .review-tile:focus-visible .review-artwork {
-    outline: 3px solid #6b2929;
-    outline-offset: 2px;
-    box-shadow: 0 .55rem .9rem rgb(27 20 17 / 38%);
-    transform: translateY(-3px) scale(1.015);
+    filter: saturate(1.08);
+}
+
+.review-tile:hover,
+.review-tile:focus-visible {
+    box-shadow: 0 .6rem 1.1rem rgb(23 78 93 / 14%);
+    transform: translateY(-2px);
+}
+
+.review-tile:focus-visible {
+    outline: 3px solid #d98b71;
+    outline-offset: 3px;
 }
 
 .review-title {
     display: -webkit-box;
     min-height: 3.75em;
     overflow: hidden;
-    font-family: 'IM Fell English SC', Georgia, serif;
-    font-size: .95rem;
-    font-weight: 700;
-    line-height: 1.25;
+    padding: .7rem .75rem .8rem;
+    font-size: .9rem;
+    font-weight: 600;
+    line-height: 1.35;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
 }
@@ -300,32 +333,32 @@ body {
 .card-message {
     grid-column: 1 / -1;
     margin: 0;
-    padding: 1rem .25rem;
-    color: #38312d;
+    padding: 1.5rem .5rem;
+    color: var(--muted);
     text-align: center;
     overflow-wrap: anywhere;
 }
 
 .card-message.is-loading {
-    color: #514842;
+    color: var(--ocean);
 }
 
 .card-message.is-error,
 .source-status.is-error {
-    color: #8c1f1f;
+    color: #a4493d;
 }
 
 .source-status {
     min-height: 1rem;
     margin: .75rem 0 0;
-    color: #514842;
+    color: var(--muted);
     font-size: .75rem;
     overflow-wrap: anywhere;
 }
 
 .site-footer {
     padding: 0 1rem 1.5rem;
-    color: #e6e0da;
+    color: var(--muted);
     font-size: .75rem;
     text-align: center;
 }
