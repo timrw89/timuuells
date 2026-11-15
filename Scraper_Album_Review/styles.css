@@ -1,0 +1,232 @@
+:root {
+    color-scheme: dark;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #111;
+    color: #f5f2ee;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(145deg, #777 0%, #5f2828 34%, #003500 70%, #080808 100%);
+}
+
+.site-header {
+    display: flex;
+    min-height: 15rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem 2.5rem;
+    text-align: center;
+}
+
+.eyebrow {
+    margin: 0 0 .25rem;
+    color: #ddd;
+    font-size: .75rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.site-header h1 {
+    margin: 0;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: clamp(3.5rem, 14vw, 5rem);
+    line-height: 1;
+}
+
+.tagline {
+    margin: .5rem 0 1.25rem;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: 1.1rem;
+}
+
+.refresh-button {
+    min-height: 2.75rem;
+    padding: .65rem 1.1rem;
+    border: 1px solid #d5c6b4;
+    border-radius: .25rem;
+    background: #211b19;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+}
+
+.refresh-button:hover:not(:disabled),
+.refresh-button:focus-visible {
+    background: #49332a;
+}
+
+.refresh-button:disabled {
+    cursor: wait;
+    opacity: .7;
+}
+
+.refresh-message {
+    min-height: 1.25rem;
+    margin: .5rem 0 0;
+    color: #eee;
+    font-size: .875rem;
+}
+
+.source-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    width: min(100% - 1.5rem, 90rem);
+    margin: 0 auto;
+    padding: 0 0 2rem;
+}
+
+.source-card {
+    min-width: 0;
+    padding: 1rem;
+    border: 4px double #777;
+    border-radius: 2.5rem .5rem;
+    background: linear-gradient(145deg, #f4f1ed, #c8c3c0 65%, #928e8b);
+    color: #171412;
+    box-shadow: 0 .75rem 1.75rem rgb(0 0 0 / 24%);
+}
+
+.source-header {
+    display: flex;
+    min-height: 3.5rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin: 0 0 .75rem;
+}
+
+.source-header h2 {
+    margin: 0;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: clamp(1.25rem, 5vw, 1.8rem);
+    line-height: 1.15;
+}
+
+.source-header a {
+    flex: 0 0 auto;
+    color: #542424;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.review-tile {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .45rem;
+    color: #161313;
+    text-decoration: none;
+}
+
+.review-artwork {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: .25rem;
+    background: linear-gradient(135deg, #302a29, #6a3e3b);
+    object-fit: cover;
+}
+
+.review-tile:hover .review-artwork,
+.review-tile:focus-visible .review-artwork {
+    outline: 3px solid #6b2929;
+    outline-offset: 2px;
+}
+
+.review-title {
+    display: -webkit-box;
+    min-height: 3.75em;
+    overflow: hidden;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: .95rem;
+    font-weight: 700;
+    line-height: 1.25;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.card-message {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 1rem .25rem;
+    color: #38312d;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.card-message.is-loading {
+    color: #514842;
+}
+
+.card-message.is-error,
+.source-status.is-error {
+    color: #8c1f1f;
+}
+
+.source-status {
+    min-height: 1rem;
+    margin: .75rem 0 0;
+    color: #514842;
+    font-size: .75rem;
+    overflow-wrap: anywhere;
+}
+
+.site-footer {
+    padding: 0 1rem 1.5rem;
+    color: #e6e0da;
+    font-size: .75rem;
+    text-align: center;
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+@media (min-width: 480px) {
+    .source-card {
+        padding: 1.25rem;
+    }
+
+    .reviews-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: .8rem;
+    }
+}
+
+@media (min-width: 760px) {
+    .source-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
+        width: min(100% - 2.5rem, 90rem);
+    }
+
+    .site-header {
+        min-height: 17rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .source-grid {
+        gap: 2rem;
+    }
+
+    .source-card {
+        padding: 1.5rem;
+    }
+}

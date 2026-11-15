@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Recent heavy metal album reviews from across the web.">
+    <title>Squeal — Metal Review Aggregator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <p class="eyebrow">The latest from the underground</p>
+        <h1>Squeal</h1>
+        <p class="tagline">A heavy metal album review aggregator</p>
+        <button class="refresh-button" id="refresh-button" type="button">
+            Refresh reviews
+        </button>
+        <p class="refresh-message" id="refresh-message" role="status" aria-live="polite"></p>
+    </header>
+
+    <main class="source-grid" id="sources">
+        <section class="source-card" data-source="angry-metal-guy">
+            <header class="source-header">
+                <h2>Angry Metal Guy</h2>
+                <a href="https://www.angrymetalguy.com/" target="_blank" rel="noopener noreferrer">Visit site</a>
+            </header>
+            <div class="reviews-grid" aria-live="polite">
+                <p class="card-message">Fetching reviews…</p>
+            </div>
+            <p class="source-status"></p>
+        </section>
+
+        <section class="source-card" data-source="metal-injection">
+            <header class="source-header">
+                <h2>Metal Injection</h2>
+                <a href="https://metalinjection.net/category/reviews" target="_blank" rel="noopener noreferrer">Visit site</a>
+            </header>
+            <div class="reviews-grid" aria-live="polite">
+                <p class="card-message">Fetching reviews…</p>
+            </div>
+            <p class="source-status"></p>
+        </section>
+
+        <section class="source-card" data-source="metalreviews">
+            <header class="source-header">
+                <h2>MetalReviews</h2>
+                <a href="https://metalreviews.com/" target="_blank" rel="noopener noreferrer">Visit site</a>
+            </header>
+            <div class="reviews-grid" aria-live="polite">
+                <p class="card-message">Fetching reviews…</p>
+            </div>
+            <p class="source-status"></p>
+        </section>
+
+        <section class="source-card" data-source="no-clean-singing">
+            <header class="source-header">
+                <h2>No Clean Singing</h2>
+                <a href="https://www.nocleansinging.com/category/reviews/album-reviews/" target="_blank" rel="noopener noreferrer">Visit site</a>
+            </header>
+            <div class="reviews-grid" aria-live="polite">
+                <p class="card-message">Fetching reviews…</p>
+            </div>
+            <p class="source-status"></p>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Review titles and artwork belong to their respective publishers.</p>
+    </footer>
+</body>
+</html>
