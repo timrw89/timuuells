@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Live Earth-focused space weather conditions, forecasts, and solar events.">
+    <meta name="theme-color" content="#090d16">
+    <title>Earth Space Weather — NASA &amp; NOAA</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./script.js" defer></script>
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+        <a class="back-link" href="../index.html"><span aria-hidden="true">←</span> Portfolio</a>
+        <p class="header-label">EARTH / SPACE WEATHER</p>
+    </header>
+
+    <main id="main">
+        <section class="hero" aria-labelledby="page-title">
+            <div class="hero-copy">
+                <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> A forecast for our place in space</p>
+                <h1 id="page-title">Space weather,<br><em>close to home.</em></h1>
+                <p class="hero-description">Track the solar wind, geomagnetic activity, and events that shape conditions around Earth.</p>
+                <div class="live-status">
+                    <span class="live-indicator" id="live-indicator" aria-hidden="true"></span>
+                    <p id="connection-status" role="status" aria-live="polite">Connecting to space weather data…</p>
+                </div>
+            </div>
+
+            <aside class="space-visual" aria-label="Illustration of Earth and its magnetic field">
+                <span class="field-line field-line--one" aria-hidden="true"></span>
+                <span class="field-line field-line--two" aria-hidden="true"></span>
+                <span class="earth" aria-hidden="true"></span>
+                <span class="solar-wind" aria-hidden="true"></span>
+                <div class="visual-caption">
+                    <span>LIVE EARTH CONDITIONS</span>
+                    <time id="last-updated">Waiting for data</time>
+                </div>
+            </aside>
+        </section>
+
+        <section class="dashboard-section" aria-labelledby="conditions-title">
+            <div class="section-heading">
+                <div>
+                    <p class="section-index">RIGHT NOW</p>
+                    <h2 id="conditions-title">Current conditions</h2>
+                </div>
+                <button class="refresh-button" id="refresh-button" type="button">
+                    Refresh <span aria-hidden="true">↻</span>
+                </button>
+            </div>
+
+            <div class="metric-grid" id="metric-grid" aria-busy="true">
+                <article class="metric-card">
+                    <p class="metric-label">Solar wind speed</p>
+                    <p class="metric-reading"><span id="solar-wind-speed">—</span><span class="metric-unit">km/s</span></p>
+                    <p class="metric-note">Charged particles flowing from the Sun</p>
+                </article>
+                <article class="metric-card">
+                    <p class="metric-label">Proton density</p>
+                    <p class="metric-reading"><span id="proton-density">—</span><span class="metric-unit">protons/cm³</span></p>
+                    <p class="metric-note">Particles measured near Earth</p>
+                </article>
+                <article class="metric-card metric-card--kp">
+                    <p class="metric-label">Geomagnetic Kp</p>
+                    <p class="metric-reading"><span id="kp-index">—</span><span class="metric-unit">/ 9</span></p>
+                    <span class="scale-badge" id="kp-scale">NOAA SCALE —</span>
+                    <p class="metric-note">Global measure of geomagnetic activity</p>
+                </article>
+                <article class="metric-card">
+                    <p class="metric-label">Interplanetary Bz</p>
+                    <p class="metric-reading"><span id="bz-value">—</span><span class="metric-unit">nT</span></p>
+                    <p class="metric-note">North–south magnetic field component</p>
+                </article>
+            </div>
+            <p class="data-note" id="noaa-note">Fetching live readings from NOAA SWPC…</p>
+        </section>
+
+        <section class="dashboard-section forecast-section" aria-labelledby="forecast-title">
+            <div class="section-heading">
+                <div>
+                    <p class="section-index">WHAT’S NEXT</p>
+                    <h2 id="forecast-title">Geomagnetic forecast</h2>
+                </div>
+                <p class="section-aside">NOAA Kp outlook · 3-hour intervals</p>
+            </div>
+            <p class="section-status" id="forecast-status">Forecast loading…</p>
+            <ol class="forecast-list" id="forecast-list" aria-label="Geomagnetic Kp forecast"></ol>
+        </section>
+
+        <section class="dashboard-section events-section" aria-labelledby="events-title">
+            <div class="section-heading">
+                <div>
+                    <p class="section-index">THE SUN, RECENTLY</p>
+                    <h2 id="events-title">Recent solar events</h2>
+                </div>
+                <p class="section-aside">NASA DONKI · past 7 days</p>
+            </div>
+            <p class="section-status" id="events-status">Loading NASA event data…</p>
+            <div class="event-grid" id="event-list"></div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>Space weather data from NOAA SWPC and NASA DONKI.</p>
+        <span>Conditions shown are Earth-focused.</span>
+    </footer>
+</body>
+</html>
