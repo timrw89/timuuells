@@ -88,9 +88,9 @@ module.exports = async function handler(request, response) {
             .filter((notification) => !Number.isNaN(new Date(notification.messageIssueTime).getTime()))
             .slice()
             .sort(
-            (left, right) =>
-                new Date(right.messageIssueTime) - new Date(left.messageIssueTime)
-        );
+                (left, right) =>
+                    new Date(right.messageIssueTime) - new Date(left.messageIssueTime)
+            );
         const latestAlert = sortedNotifications.length > 0
             ? normalizeNotification(sortedNotifications[0])
             : null;

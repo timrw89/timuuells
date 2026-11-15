@@ -67,7 +67,7 @@ async function pollSolarAnimation(job, requestId, attempt = 0) {
     if (requestId !== animationRequestId) {
         return;
     }
-    if (attempt >= 60) {
+    if (attempt >= 40) {
         throw new Error("Helioviewer is taking longer than expected. Refresh to try again.");
     }
 
@@ -83,7 +83,7 @@ async function pollSolarAnimation(job, requestId, attempt = 0) {
         window.setTimeout(() => {
             pollSolarAnimation(job, requestId, attempt + 1)
                 .catch((error) => showAnimationError(error, requestId));
-        }, 6000);
+        }, 15000);
         return;
     }
 
@@ -115,6 +115,7 @@ async function loadSolarAnimation(alert) {
         solarVideo.hidden = true;
         solarVideo.load();
         animationStatus.textContent = "No NASA alert is available to build a recent time-lapse.";
+        animationStatus.classList.remove("is-warning");
         animationCaption.textContent = "NASA DONKI has not reported an alert in the current 7-day window.";
         latestAlertLink.hidden = true;
         return;

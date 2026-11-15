@@ -39,19 +39,29 @@ function readBody(request) {
     return {};
 }
 
+function badRequest(message) {
+    const error = new Error(message);
+    error.statusCode = 400;
+    return error;
+}
+
 async function queueMovie(time, type) {
+    if (typeof time !== "string") {
+        throw badRequest("The NASA alert timestamp is invalid.");
+    }
+
     const eventTime = new Date(time);
     if (Number.isNaN(eventTime.getTime())) {
-        throw new Error("The NASA alert timestamp is invalid.");
+        throw badRequest("The NASA alert timestamp is invalid.");
     }
 
     const age = Date.now() - eventTime.getTime();
     if (age > 8 * 24 * 60 * 60 * 1000 || age < -5 * 60 * 1000) {
-        throw new Error("The NASA alert timestamp is outside the available 7-day window.");
+        throw badRequest("The NASA alert timestamp is outside the available 7-day window.");
     }
 
     if (typeof type !== "string" || !/^[A-Za-z0-9_-]{1,40}$/.test(type)) {
-        throw new Error("The NASA alert type is invalid.");
+        throw badRequest("The NASA alert type is invalid.");
     }
 
     const channel = type === "FLR" ? "131" : "193";
@@ -98,7 +108,7 @@ async function getMovieStatus(id, token) {
         typeof token !== "string" ||
         !/^[a-f0-9]{32,64}$/i.test(token)
     ) {
-        throw new Error("The Helioviewer movie job is invalid.");
+        throw badRequest("The Helioviewer movie job is invalid.");
     }
 
     const url = new URL("https://api.helioviewer.org/v2/getMovieStatus/");
@@ -153,7 +163,7 @@ module.exports = async function handler(request, response) {
         return response.status(statusCode).json(result);
     } catch (error) {
         console.error("Helioviewer solar animation request failed.", error);
-        return response.status(502).json({
+        return response.status(error.statusCode || 502).json({
             error: "Unable to prepare the solar animation.",
             details: [error.message]
         });
