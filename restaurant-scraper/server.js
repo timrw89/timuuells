@@ -165,7 +165,7 @@ async function scrapeSource(source) {
                 timeout: 15000,
                 headers: {
                     Accept: 'text/html,application/rss+xml,application/xml;q=0.9,*/*;q=0.8',
-                    'User-Agent': 'RhodyScoopAggregator/1.0'
+                    'User-Agent': 'DigestRhodyAggregator/1.0'
                 }
             });
             const found = endpoint.type === 'rss'
@@ -239,6 +239,6 @@ app.post('/api/refresh', async (request, response) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Rhody Scoop is running at http://localhost:${PORT}`);
+    console.log(`Digest Rhody is running at http://localhost:${PORT}`);
     refreshReviews();
 });
