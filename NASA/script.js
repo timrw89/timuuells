@@ -1,4 +1,5 @@
 const refreshButton = document.querySelector("#refresh-button");
+const animationToggle = document.querySelector("#animation-toggle");
 const metricGrid = document.querySelector("#metric-grid");
 const liveIndicator = document.querySelector("#live-indicator");
 const connectionStatus = document.querySelector("#connection-status");
@@ -6,13 +7,17 @@ const lastUpdated = document.querySelector("#last-updated");
 const nasaNote = document.querySelector("#nasa-note");
 const animationStatus = document.querySelector("#animation-status");
 const animationCaption = document.querySelector("#animation-caption");
+const animationFrameTime = document.querySelector("#animation-frame-time");
 const latestAlertLink = document.querySelector("#latest-alert-link");
-const solarVideo = document.querySelector("#solar-video");
+const solarFrame = document.querySelector("#solar-frame");
 
 let isLoading = false;
+let isLoadingAnimation = false;
 let animationAlertTime = "";
 let animationRequestId = 0;
-let animationPending = false;
+let animationFrames = [];
+let animationFrameIndex = 0;
+let animationInterval = null;
 
 function formatNumber(value) {
     const number = Number(value);
@@ -51,69 +56,81 @@ async function readResponse(response) {
     return data;
 }
 
+function stopAnimation() {
+    if (animationInterval !== null) {
+        window.clearInterval(animationInterval);
+        animationInterval = null;
+    }
+}
+
+function resetAnimation() {
+    stopAnimation();
+    animationFrames = [];
+    animationFrameIndex = 0;
+    animationToggle.disabled = true;
+    animationToggle.textContent = "Play animation";
+    solarFrame.hidden = true;
+    solarFrame.removeAttribute("src");
+    solarFrame.alt = "";
+    animationFrameTime.textContent = "Waiting for solar images…";
+}
+
+function showFrame(index) {
+    const frame = animationFrames[index];
+    if (!frame) {
+        return;
+    }
+
+    animationFrameIndex = index;
+    solarFrame.src = frame.url;
+    solarFrame.alt = `SDO/AIA ${frame.channel} Å solar image at ${formatTime(frame.time, true)}`;
+    solarFrame.hidden = false;
+    animationFrameTime.dateTime = frame.time;
+    animationFrameTime.textContent =
+        `Frame ${index + 1} of ${animationFrames.length} · ` +
+        `${formatTime(frame.time, true)} · SDO/AIA ${frame.channel} Å`;
+}
+
+function playAnimation() {
+    if (animationFrames.length === 0) {
+        return;
+    }
+
+    stopAnimation();
+    animationToggle.textContent = "Pause animation";
+    animationInterval = window.setInterval(() => {
+        showFrame((animationFrameIndex + 1) % animationFrames.length);
+    }, 750);
+}
+
+function preloadFrame(frame) {
+    return new Promise((resolve) => {
+        const image = new Image();
+        image.onload = () => resolve(frame);
+        image.onerror = () => resolve(null);
+        image.src = frame.url;
+    });
+}
+
 function showAnimationError(error, requestId) {
     if (requestId !== animationRequestId) {
         return;
     }
 
-    console.error("Unable to create the Helioviewer animation.", error);
+    console.error("Unable to load Helioviewer images.", error);
     animationStatus.textContent = error.message;
     animationStatus.classList.add("is-warning");
-    animationPending = false;
+    isLoadingAnimation = false;
     animationAlertTime = "";
-}
-
-async function pollSolarAnimation(job, requestId, attempt = 0) {
-    if (requestId !== animationRequestId) {
-        return;
-    }
-    if (attempt >= 40) {
-        throw new Error("Helioviewer is taking longer than expected. Refresh to try again.");
-    }
-
-    const response = await fetch("/api/solar-motion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify({ id: job.id, token: job.token })
-    });
-    const result = await readResponse(response);
-
-    if (response.status === 202) {
-        animationStatus.textContent = `Helioviewer is rendering the solar time-lapse (${result.status}).`;
-        window.setTimeout(() => {
-            pollSolarAnimation(job, requestId, attempt + 1)
-                .catch((error) => showAnimationError(error, requestId));
-        }, 15000);
-        return;
-    }
-
-    if (requestId !== animationRequestId) {
-        return;
-    }
-
-    solarVideo.poster = result.posterUrl;
-    solarVideo.src = result.videoUrl;
-    solarVideo.hidden = false;
-    solarVideo.load();
-    animationStatus.textContent = `Animation ready: ${result.title}.`;
-    animationStatus.classList.remove("is-warning");
-    animationPending = false;
-
-    solarVideo.play().catch(() => {
-        animationStatus.textContent = `Animation ready: ${result.title}. Press play to start.`;
-    });
+    resetAnimation();
 }
 
 async function loadSolarAnimation(alert) {
     if (!alert || !alert.time || !alert.code) {
         animationRequestId += 1;
-        animationPending = false;
+        isLoadingAnimation = false;
         animationAlertTime = "";
-        solarVideo.pause();
-        solarVideo.removeAttribute("src");
-        solarVideo.removeAttribute("poster");
-        solarVideo.hidden = true;
-        solarVideo.load();
+        resetAnimation();
         animationStatus.textContent = "No NASA alert is available to build a recent time-lapse.";
         animationStatus.classList.remove("is-warning");
         animationCaption.textContent = "NASA DONKI has not reported an alert in the current 7-day window.";
@@ -121,23 +138,24 @@ async function loadSolarAnimation(alert) {
         return;
     }
 
-    if (animationAlertTime === alert.time && (animationPending || !solarVideo.hidden)) {
+    if (
+        animationAlertTime === alert.time &&
+        (isLoadingAnimation || animationFrames.length > 0)
+    ) {
         return;
     }
 
     animationAlertTime = alert.time;
-    animationPending = true;
+    isLoadingAnimation = true;
     const requestId = ++animationRequestId;
     const alertTime = formatTime(alert.time, true);
 
-    solarVideo.pause();
-    solarVideo.removeAttribute("src");
-    solarVideo.removeAttribute("poster");
-    solarVideo.hidden = true;
-    solarVideo.load();
+    resetAnimation();
     animationStatus.classList.remove("is-warning");
-    animationStatus.textContent = `Preparing a time-lapse around the NASA alert from ${alertTime}…`;
-    animationCaption.textContent = `${alert.title || alert.type} · NASA alert issued ${alertTime}. The animation covers the 24 hours before that timestamp.`;
+    animationStatus.textContent = `Preparing solar images around the NASA alert from ${alertTime}…`;
+    animationCaption.textContent =
+        `${alert.title || alert.type} · NASA alert issued ${alertTime}. ` +
+        "The animation covers the 24 hours before that timestamp, in two-hour steps.";
 
     if (alert.url) {
         latestAlertLink.href = alert.url;
@@ -152,16 +170,60 @@ async function loadSolarAnimation(alert) {
             headers: { "Content-Type": "application/json", Accept: "application/json" },
             body: JSON.stringify({ time: alert.time, type: alert.code })
         });
-        const job = await readResponse(response);
-        if (response.status !== 202) {
-            throw new Error("Helioviewer did not start the animation job.");
+        const data = await readResponse(response);
+        if (requestId !== animationRequestId) {
+            return;
+        }
+        if (!Array.isArray(data.frames) || data.frames.length === 0) {
+            throw new Error("Helioviewer did not provide any solar images.");
         }
 
-        const estimate = job.eta ? ` Estimated wait: about ${Math.ceil(job.eta / 60)} min.` : "";
-        animationStatus.textContent = `Helioviewer queued the SDO/AIA ${job.channel} Å time-lapse.${estimate}`;
-        await pollSolarAnimation(job, requestId);
+        const loadedFrames = [];
+        for (let offset = 0; offset < data.frames.length; offset += 3) {
+            if (requestId !== animationRequestId) {
+                return;
+            }
+
+            const batch = data.frames.slice(offset, offset + 3);
+            animationStatus.textContent =
+                `Loading solar images ${Math.min(offset + batch.length, data.frames.length)} ` +
+                `of ${data.frames.length}…`;
+            const results = await Promise.all(batch.map(preloadFrame));
+            loadedFrames.push(...results.filter(Boolean));
+        }
+
+        if (requestId !== animationRequestId) {
+            return;
+        }
+        if (loadedFrames.length === 0) {
+            throw new Error("No SDO/AIA images were available for this NASA alert.");
+        }
+
+        animationFrames = loadedFrames.map((frame) => ({
+            ...frame,
+            channel: data.channel
+        }));
+        showFrame(0);
+        animationToggle.disabled = false;
+
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const availability = loadedFrames.length === data.frames.length
+            ? `${loadedFrames.length} solar images loaded.`
+            : `${loadedFrames.length} of ${data.frames.length} solar images were available.`;
+
+        if (reducedMotion) {
+            animationToggle.textContent = "Play animation";
+            animationStatus.textContent = `${availability} Press play to start the time-lapse.`;
+        } else {
+            playAnimation();
+            animationStatus.textContent = `${availability} Playing the 24-hour time-lapse.`;
+        }
     } catch (error) {
         showAnimationError(error, requestId);
+    } finally {
+        if (requestId === animationRequestId) {
+            isLoadingAnimation = false;
+        }
     }
 }
 
@@ -211,6 +273,17 @@ async function refreshDashboard() {
         setLoading(false);
     }
 }
+
+animationToggle.addEventListener("click", () => {
+    if (animationInterval === null) {
+        playAnimation();
+        animationStatus.textContent = "Playing the solar time-lapse.";
+    } else {
+        stopAnimation();
+        animationToggle.textContent = "Play animation";
+        animationStatus.textContent = "Solar time-lapse paused.";
+    }
+});
 
 refreshButton.addEventListener("click", refreshDashboard);
 refreshDashboard();

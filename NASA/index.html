@@ -84,24 +84,21 @@
                     <h2 id="solar-motion-title">The Sun in motion</h2>
                 </div>
                 <p class="section-aside">SDO / AIA · Helioviewer</p>
+                <button class="refresh-button" id="animation-toggle" type="button" disabled>
+                    Play animation
+                </button>
             </div>
             <p class="section-status" id="animation-status" role="status" aria-live="polite">
                 Waiting for a recent NASA alert…
             </p>
-            <video
-                class="solar-video"
-                id="solar-video"
-                controls
-                autoplay
-                muted
-                loop
-                playsinline
-                preload="none"
-                aria-label="Looping solar time-lapse around the most recent NASA alert"
-                hidden
-            ></video>
+            <div class="solar-animation">
+                <img id="solar-frame" alt="" hidden>
+            </div>
+            <time class="animation-frame-time" id="animation-frame-time" aria-live="off">
+                Waiting for solar images…
+            </time>
             <p class="animation-caption" id="animation-caption">
-                A short time-lapse will be generated from the 24 hours before the latest NASA alert.
+                Images from the 24 hours before the latest NASA alert will form a time-lapse.
             </p>
             <a class="event-link" id="latest-alert-link" target="_blank" rel="noopener noreferrer" hidden>
                 View the NASA alert

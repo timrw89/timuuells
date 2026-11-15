@@ -394,21 +394,37 @@ p {
     padding-block: 3.5rem;
 }
 
-.solar-video {
-    display: block;
-    width: min(100%, 56rem);
-    max-height: 70vh;
-    aspect-ratio: 16 / 9;
+.solar-animation {
+    display: grid;
+    width: min(100%, 42rem);
+    aspect-ratio: 1;
     margin: 1.25rem auto 0;
+    overflow: hidden;
     border: 1px solid var(--color-line);
     border-radius: .35rem;
-    background: #080d16;
+    background:
+        radial-gradient(circle, rgb(255 179 82 / 12%), transparent 58%),
+        #080d16;
+    place-items: center;
+}
+
+.solar-animation img {
+    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
 }
 
-.solar-video[hidden],
+.solar-animation img[hidden],
 .event-link[hidden] {
     display: none;
+}
+
+.animation-frame-time {
+    margin: .55rem 0 0;
+    color: var(--color-cyan);
+    font-size: .72rem;
+    text-align: center;
 }
 
 .animation-caption {
