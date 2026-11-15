@@ -15,7 +15,7 @@ Open [http://localhost:3000](http://localhost:3000). The refresh button is limit
 
 ## Deploy to Vercel
 
-1. Push this folder to a GitHub repository. If it is inside a larger repository, set the Vercel project's **Root Directory** to `Restaurant Scraper`.
+1. Push this folder to a GitHub repository. If it is inside a larger repository, set the Vercel project's **Root Directory** to `restaurant-scraper`.
 2. Import the repository in Vercel. Leave the framework preset and build settings on automatic detection; Vercel detects the Express app in `server.js`.
 3. Deploy. Vercel installs dependencies from `package.json`, serves frontend files from `public/`, and routes API requests to the Express app. No environment variables or custom `vercel.json` are required.
 
