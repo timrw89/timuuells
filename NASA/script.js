@@ -40,6 +40,28 @@ function createEventCard(event) {
     const card = document.createElement("article");
     card.className = "event-card";
 
+    if (event.imageUrl) {
+        const figure = document.createElement("figure");
+        figure.className = "event-image";
+
+        const image = document.createElement("img");
+        image.src = event.imageUrl;
+        image.alt = `SDO/AIA ${event.imageChannel} Å image closest to the NASA alert time`;
+        image.loading = "lazy";
+        image.decoding = "async";
+
+        const caption = document.createElement("figcaption");
+        caption.textContent = `SDO/AIA ${event.imageChannel} Å · closest image to alert time`;
+        image.addEventListener("error", () => {
+            figure.classList.add("is-unavailable");
+            image.hidden = true;
+            caption.textContent = "No SDO image is available near this alert time.";
+        }, { once: true });
+
+        figure.append(image, caption);
+        card.append(figure);
+    }
+
     const type = document.createElement("p");
     type.className = "event-type";
     type.textContent = event.type || "NASA NOTIFICATION";

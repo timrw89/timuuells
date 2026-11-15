@@ -50,15 +50,42 @@ function getNasaUrl(value) {
     }
 }
 
+function getHelioviewerImageUrl(time, type) {
+    const date = new Date(time);
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    const channel = type === "FLR" ? "131" : "193";
+    const url = new URL("https://api.helioviewer.org/v2/takeScreenshot/");
+    url.search = new URLSearchParams({
+        date: date.toISOString(),
+        imageScale: "4",
+        layers: `[SDO,AIA,AIA,${channel},1,100]`,
+        events: "",
+        eventLabels: "false",
+        x0: "0",
+        y0: "0",
+        width: "512",
+        height: "512",
+        display: "true",
+        watermark: "true"
+    }).toString();
+    return url.href;
+}
+
 function normalizeNotification(notification) {
     const type = notification.messageType || "NASA notification";
+    const time = notification.messageIssueTime || "";
 
     return {
         type: EVENT_LABELS[type] || type,
         title: getEventTitle(notification.messageBody, type),
-        time: notification.messageIssueTime || "",
+        time,
         summary: getEventSummary(notification.messageBody),
-        url: getNasaUrl(notification.messageURL)
+        url: getNasaUrl(notification.messageURL),
+        imageUrl: getHelioviewerImageUrl(time, type),
+        imageChannel: type === "FLR" ? "131" : "193"
     };
 }
 
@@ -95,10 +122,11 @@ module.exports = async function handler(request, response) {
             throw new Error("NASA DONKI returned data in an unsupported format.");
         }
 
-        const events = notifications
-            .map(normalizeNotification)
-            .sort((left, right) => new Date(right.time) - new Date(left.time))
-            .slice(0, 30);
+        const sortedNotifications = notifications.slice().sort(
+            (left, right) =>
+                new Date(right.messageIssueTime) - new Date(left.messageIssueTime)
+        );
+        const events = sortedNotifications.slice(0, 12).map(normalizeNotification);
         const types = notifications.map((notification) => notification.messageType);
 
         return response.status(200).json({

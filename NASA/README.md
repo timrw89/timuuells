@@ -10,6 +10,8 @@ An Earth-focused space-weather dashboard that reads recent event notifications f
 
 The dashboard summarizes NASA-reported flares, coronal mass ejections, and geomagnetic storms. NASA DONKI provides event alerts rather than continuous solar-wind measurements or a Kp forecast.
 
+Event cards also request a timestamp-matched SDO/AIA image from the public [Helioviewer API](https://api.helioviewer.org/docs/v2/). Images are matched to the NASA alert issue time, which can differ from the actual event time. The image request uses AIA 131 Å for flares and AIA 193 Å for other alerts.
+
 ## Local development
 
 Run these commands from the `NASA` folder so the Vercel CLI can find the serverless route. In PowerShell, set the key in your local shell and start the dev server:
