@@ -83,7 +83,10 @@ function imageFromElement($, element) {
 }
 
 function makeReview(source, titleValue, imageValue, linkValue, baseUrl) {
-    const title = text(titleValue);
+    const rawTitle = text(titleValue);
+    const title = source.id === 'ri-monthly'
+        ? rawTitle.replace(/^Dining Review\b\s*(?::|[-–—])?\s*/i, '')
+        : rawTitle;
     const url = resolveUrl(linkValue, baseUrl, source.host);
     const image = resolveUrl(imageValue, baseUrl);
     if (!title || !url || !image) return null;
