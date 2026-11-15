@@ -394,85 +394,36 @@ p {
     padding-block: 3.5rem;
 }
 
-.event-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: .85rem;
-    margin-top: 1.25rem;
-}
-
-.event-card {
-    padding: 1.1rem;
+.solar-video {
+    display: block;
+    width: min(100%, 56rem);
+    max-height: 70vh;
+    aspect-ratio: 16 / 9;
+    margin: 1.25rem auto 0;
     border: 1px solid var(--color-line);
     border-radius: .35rem;
-    background: linear-gradient(145deg, rgb(20 30 47 / 88%), rgb(14 20 32 / 95%));
-}
-
-.event-image {
-    display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
-    aspect-ratio: 1;
-    overflow: hidden;
-    margin: 0 0 1rem;
-    min-width: 0;
-    place-items: center;
-    border-radius: .25rem;
     background: #080d16;
-}
-
-.event-image img {
-    display: block;
-    width: 100%;
-    height: 100%;
     object-fit: contain;
 }
 
-.event-image figcaption {
-    padding: .6rem;
+.solar-video[hidden],
+.event-link[hidden] {
+    display: none;
+}
+
+.animation-caption {
+    width: min(100%, 56rem);
+    margin: .85rem auto 0;
     color: var(--color-muted);
-    font-size: .64rem;
-    text-align: center;
-}
-
-.event-image.is-unavailable {
-    aspect-ratio: auto;
-    grid-template-rows: 1fr;
-    min-height: 3rem;
-}
-
-.event-type {
-    margin: 0 0 .65rem;
-    color: var(--color-cyan);
-    font-size: .55rem;
-}
-
-.event-card h3 {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: 1.45rem;
-    font-weight: 400;
-    line-height: 1.2;
-}
-
-.event-time {
-    display: block;
-    margin-top: .55rem;
-    color: var(--color-muted);
-    font-size: .7rem;
-}
-
-.event-summary {
-    margin: .8rem 0 0;
-    color: #c4cfdd;
-    font-size: .8rem;
+    font-size: .76rem;
     line-height: 1.55;
 }
 
 .event-link {
     display: inline-block;
-    margin-top: .9rem;
+    margin-top: .6rem;
     color: var(--color-cyan);
-    font-size: .72rem;
+    font-size: .76rem;
     text-underline-offset: .2em;
 }
 
@@ -510,10 +461,6 @@ p {
     .metric-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 1rem;
-    }
-
-    .event-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .section-heading {

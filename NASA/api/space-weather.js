@@ -28,18 +28,6 @@ function getEventTitle(body, type) {
     return heading ? heading[1].replace(/[*`]/g, "").trim() : EVENT_LABELS[type] || type;
 }
 
-function getEventSummary(body) {
-    return String(body || "")
-        .replace(/\r/g, "")
-        .replace(/^#{1,6}\s.*$/gm, "")
-        .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-        .replace(/https?:\/\/\S+/g, "")
-        .replace(/[*_`>#]/g, "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .slice(0, 320);
-}
-
 function getNasaUrl(value) {
     try {
         const url = new URL(value);
@@ -50,42 +38,16 @@ function getNasaUrl(value) {
     }
 }
 
-function getHelioviewerImageUrl(time, type) {
-    const date = new Date(time);
-    if (Number.isNaN(date.getTime())) {
-        return "";
-    }
-
-    const channel = type === "FLR" ? "131" : "193";
-    const url = new URL("https://api.helioviewer.org/v2/takeScreenshot/");
-    url.search = new URLSearchParams({
-        date: date.toISOString(),
-        imageScale: "4",
-        layers: `[SDO,AIA,AIA,${channel},1,100]`,
-        events: "",
-        eventLabels: "false",
-        x0: "0",
-        y0: "0",
-        width: "512",
-        height: "512",
-        display: "true",
-        watermark: "true"
-    }).toString();
-    return url.href;
-}
-
 function normalizeNotification(notification) {
     const type = notification.messageType || "NASA notification";
     const time = notification.messageIssueTime || "";
 
     return {
+        code: type,
         type: EVENT_LABELS[type] || type,
         title: getEventTitle(notification.messageBody, type),
         time,
-        summary: getEventSummary(notification.messageBody),
-        url: getNasaUrl(notification.messageURL),
-        imageUrl: getHelioviewerImageUrl(time, type),
-        imageChannel: type === "FLR" ? "131" : "193"
+        url: getNasaUrl(notification.messageURL)
     };
 }
 
@@ -122,11 +84,16 @@ module.exports = async function handler(request, response) {
             throw new Error("NASA DONKI returned data in an unsupported format.");
         }
 
-        const sortedNotifications = notifications.slice().sort(
+        const sortedNotifications = notifications
+            .filter((notification) => !Number.isNaN(new Date(notification.messageIssueTime).getTime()))
+            .slice()
+            .sort(
             (left, right) =>
                 new Date(right.messageIssueTime) - new Date(left.messageIssueTime)
         );
-        const events = sortedNotifications.slice(0, 12).map(normalizeNotification);
+        const latestAlert = sortedNotifications.length > 0
+            ? normalizeNotification(sortedNotifications[0])
+            : null;
         const types = notifications.map((notification) => notification.messageType);
 
         return response.status(200).json({
@@ -139,7 +106,7 @@ module.exports = async function handler(request, response) {
                 storms: types.filter((type) => type === "GST").length,
                 total: notifications.length
             },
-            events
+            latestAlert
         });
     } catch (error) {
         console.error("NASA DONKI request failed.", error);

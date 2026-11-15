@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Live Earth-focused space weather conditions, forecasts, and solar events.">
+    <meta name="description" content="NASA-reported solar activity with SDO/AIA time-lapse imagery.">
     <meta name="theme-color" content="#090d16">
     <title>Earth Space Weather — NASA DONKI</title>
     <link rel="stylesheet" href="./styles.css">
@@ -77,22 +77,41 @@
             <p class="data-note" id="nasa-note">Fetching recent event alerts from NASA DONKI…</p>
         </section>
 
-        <section class="dashboard-section events-section" aria-labelledby="events-title">
+        <section class="dashboard-section events-section" aria-labelledby="solar-motion-title">
             <div class="section-heading">
                 <div>
-                    <p class="section-index">THE SUN, RECENTLY</p>
-                    <h2 id="events-title">NASA event alerts</h2>
+                    <p class="section-index">MOST RECENT DONKI TIMESTAMP</p>
+                    <h2 id="solar-motion-title">The Sun in motion</h2>
                 </div>
-                <p class="section-aside">NASA DONKI notifications · past 7 days</p>
+                <p class="section-aside">SDO / AIA · Helioviewer</p>
             </div>
-            <p class="section-status" id="events-status">Loading NASA event data…</p>
-            <div class="event-grid" id="event-list"></div>
+            <p class="section-status" id="animation-status" role="status" aria-live="polite">
+                Waiting for a recent NASA alert…
+            </p>
+            <video
+                class="solar-video"
+                id="solar-video"
+                controls
+                autoplay
+                muted
+                loop
+                playsinline
+                preload="none"
+                aria-label="Looping solar time-lapse around the most recent NASA alert"
+                hidden
+            ></video>
+            <p class="animation-caption" id="animation-caption">
+                A short time-lapse will be generated from the 30 minutes before the latest NASA alert.
+            </p>
+            <a class="event-link" id="latest-alert-link" target="_blank" rel="noopener noreferrer" hidden>
+                View the NASA alert
+            </a>
         </section>
     </main>
 
     <footer class="site-footer">
-        <p>Event data from NASA DONKI.</p>
-        <span>NASA alerts are not continuous solar-wind measurements or a Kp forecast.</span>
+        <p>Event timestamps from NASA DONKI; solar imagery from SDO/AIA via Helioviewer.</p>
+        <span>The animation ends at the alert issue time, which may differ from the event time.</span>
     </footer>
 </body>
 </html>
