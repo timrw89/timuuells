@@ -168,7 +168,7 @@ body {
 
 .site-header h1 {
     margin: 0;
-    font-family: 'IM Fell English SC', Georgia, serif;
+    font-family: 'Monoton', cursive;
     font-size: clamp(3.5rem, 14vw, 5rem);
     line-height: 1;
     color: var(--ocean-deep);
@@ -251,6 +251,7 @@ body {
 
 .source-header h2 {
     margin: 0;
+    font-family: 'Fascinate Inline', Arial, sans-serif;
     color: var(--ocean-deep);
     font-size: clamp(1.15rem, 4vw, 1.45rem);
     line-height: 1.15;
