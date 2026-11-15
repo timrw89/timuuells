@@ -1,0 +1,394 @@
+:root {
+    color-scheme: dark;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #111;
+    color: #f5f2ee;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(145deg, #777 0%, #5f2828 34%, #003500 70%, #080808 100%);
+}
+
+.site-menu {
+    position: fixed;
+    z-index: 2;
+    top: .75rem;
+    left: .75rem;
+}
+
+.site-menu-toggle {
+    display: grid;
+    width: 2.75rem;
+    min-height: 2.75rem;
+    place-items: center;
+    padding: 0;
+    border: 1px solid #d5c6b4;
+    border-radius: .25rem;
+    background: linear-gradient(160deg, #39302b, #211b19 70%);
+    box-shadow: 0 .3rem .65rem rgb(0 0 0 / 28%), inset 0 1px rgb(255 255 255 / 12%);
+    color: #f5f2ee;
+    cursor: pointer;
+    list-style: none;
+    transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.site-menu-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.menu-icon {
+    position: relative;
+    display: block;
+    width: 1.2rem;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: background 160ms ease;
+}
+
+.menu-icon::before,
+.menu-icon::after {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    content: "";
+    transition: transform 160ms ease;
+}
+
+.menu-icon::before {
+    top: -.4rem;
+}
+
+.menu-icon::after {
+    top: .4rem;
+}
+
+.site-menu[open] .menu-icon {
+    background: transparent;
+}
+
+.site-menu[open] .menu-icon::before {
+    transform: translateY(.4rem) rotate(45deg);
+}
+
+.site-menu[open] .menu-icon::after {
+    transform: translateY(-.4rem) rotate(-45deg);
+}
+
+.site-menu-toggle:hover,
+.site-menu-toggle:focus-visible {
+    background: linear-gradient(160deg, #594034, #49332a 70%);
+    box-shadow: 0 .45rem .8rem rgb(0 0 0 / 35%), inset 0 1px rgb(255 255 255 / 16%);
+    transform: translateY(-2px);
+}
+
+.site-menu-toggle:focus-visible,
+.site-menu-links a:focus-visible {
+    outline: 3px solid #d5c6b4;
+    outline-offset: 3px;
+}
+
+.site-menu-links {
+    position: absolute;
+    top: calc(100% + .5rem);
+    left: 0;
+    display: grid;
+    width: min(15rem, calc(100vw - 1.5rem));
+    padding: .4rem;
+    border: 2px solid #514d47;
+    border-radius: .35rem 1rem .35rem .35rem;
+    background: linear-gradient(145deg, #b4aea4, #77736c 72%, #625e58);
+    box-shadow: 0 .75rem 1.25rem rgb(0 0 0 / 45%), inset 0 1px rgb(255 255 255 / 40%);
+}
+
+.site-menu-links a {
+    padding: .7rem .75rem;
+    border-bottom: 1px solid rgb(45 42 38 / 25%);
+    color: #211f1c;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-shadow: 0 1px rgb(255 255 255 / 35%);
+}
+
+.site-menu-links a:last-child {
+    border-bottom: 0;
+}
+
+.site-menu-links a:hover,
+.site-menu-links a:focus-visible {
+    border-radius: .2rem;
+    background: rgb(255 255 255 / 16%);
+}
+
+.site-header {
+    display: flex;
+    min-height: 15rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem 2.5rem;
+    text-align: center;
+}
+
+.eyebrow {
+    margin: 0 0 .25rem;
+    color: #ddd;
+    font-size: .75rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+.site-header h1 {
+    margin: 0;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: clamp(3.5rem, 14vw, 5rem);
+    line-height: 1;
+    text-shadow: 0 .12em .08em rgb(0 0 0 / 35%);
+}
+
+.tagline {
+    margin: .5rem 0 1.25rem;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: 1.1rem;
+}
+
+.refresh-button {
+    min-height: 2.75rem;
+    padding: .65rem 1.1rem;
+    border: 1px solid #d5c6b4;
+    border-radius: .25rem;
+    background: linear-gradient(160deg, #39302b, #211b19 70%);
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    box-shadow: 0 .3rem .65rem rgb(0 0 0 / 28%), inset 0 1px rgb(255 255 255 / 12%);
+    transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.refresh-button:hover:not(:disabled),
+.refresh-button:focus-visible {
+    background: linear-gradient(160deg, #594034, #49332a 70%);
+    box-shadow: 0 .45rem .8rem rgb(0 0 0 / 35%), inset 0 1px rgb(255 255 255 / 16%);
+    transform: translateY(-2px);
+}
+
+.refresh-button:disabled {
+    cursor: wait;
+    opacity: .7;
+}
+
+.refresh-message {
+    min-height: 1.25rem;
+    margin: .5rem 0 0;
+    color: #eee;
+    font-size: .875rem;
+}
+
+.source-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem;
+    width: min(100% - 1.5rem, 90rem);
+    margin: 0 auto;
+    padding: 0 0 2rem;
+}
+
+.source-card {
+    scroll-margin-top: 1rem;
+    min-width: 0;
+    padding: 1rem;
+    border: 4px double #777;
+    border-radius: 2.5rem .5rem;
+    background: linear-gradient(145deg, #fbf8f3 0%, #d3ceca 58%, #aaa39e 100%);
+    color: #171412;
+    box-shadow: 0 1rem 2rem rgb(0 0 0 / 30%), 0 .2rem .35rem rgb(0 0 0 / 22%), inset 0 1px rgb(255 255 255 / 70%);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.source-card:hover {
+    box-shadow: 0 1.25rem 2.25rem rgb(0 0 0 / 36%), 0 .25rem .4rem rgb(0 0 0 / 25%), inset 0 1px rgb(255 255 255 / 70%);
+    transform: translateY(-3px);
+}
+
+.source-header {
+    display: flex;
+    min-height: 3.5rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    margin: 0 0 .75rem;
+}
+
+.source-header h2 {
+    margin: 0;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: clamp(1.25rem, 5vw, 1.8rem);
+    line-height: 1.15;
+}
+
+.source-header a {
+    flex: 0 0 auto;
+    color: #542424;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.review-tile {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: .45rem;
+    color: #161313;
+    text-decoration: none;
+}
+
+.review-artwork {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: .25rem;
+    background: linear-gradient(135deg, #302a29, #6a3e3b);
+    object-fit: cover;
+    box-shadow: 0 .3rem .65rem rgb(27 20 17 / 30%), inset 0 1px rgb(255 255 255 / 20%);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.review-tile:hover .review-artwork,
+.review-tile:focus-visible .review-artwork {
+    outline: 3px solid #6b2929;
+    outline-offset: 2px;
+    box-shadow: 0 .55rem .9rem rgb(27 20 17 / 38%);
+    transform: translateY(-3px) scale(1.015);
+}
+
+.review-title {
+    display: -webkit-box;
+    min-height: 3.75em;
+    overflow: hidden;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: .95rem;
+    font-weight: 700;
+    line-height: 1.25;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+}
+
+.card-message {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 1rem .25rem;
+    color: #38312d;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.card-message.is-loading {
+    color: #514842;
+}
+
+.card-message.is-error,
+.source-status.is-error {
+    color: #8c1f1f;
+}
+
+.source-status {
+    min-height: 1rem;
+    margin: .75rem 0 0;
+    color: #514842;
+    font-size: .75rem;
+    overflow-wrap: anywhere;
+}
+
+.site-footer {
+    padding: 0 1rem 1.5rem;
+    color: #e6e0da;
+    font-size: .75rem;
+    text-align: center;
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+@media (min-width: 480px) {
+    .source-card {
+        padding: 1.25rem;
+    }
+
+    .reviews-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: .8rem;
+    }
+}
+
+@media (min-width: 760px) {
+    .source-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
+        width: min(100% - 2.5rem, 90rem);
+    }
+
+    .site-header {
+        min-height: 17rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .source-grid {
+        gap: 2rem;
+    }
+
+    .source-card {
+        padding: 1.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    .refresh-button,
+    .site-menu-toggle,
+    .menu-icon,
+    .menu-icon::before,
+    .menu-icon::after,
+    .source-card,
+    .review-artwork {
+        transition: none;
+    }
+
+    .refresh-button:hover:not(:disabled),
+    .refresh-button:focus-visible,
+    .site-menu-toggle:hover,
+    .site-menu-toggle:focus-visible,
+    .source-card:hover,
+    .review-tile:hover .review-artwork,
+    .review-tile:focus-visible .review-artwork {
+        transform: none;
+    }
+}
