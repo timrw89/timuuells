@@ -11,11 +11,104 @@
     box-sizing: border-box;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     min-width: 320px;
     min-height: 100vh;
     margin: 0;
     background: linear-gradient(145deg, #777 0%, #5f2828 34%, #003500 70%, #080808 100%);
+}
+
+.site-menu {
+    position: fixed;
+    z-index: 2;
+    top: .75rem;
+    left: .75rem;
+}
+
+.site-menu-toggle {
+    position: relative;
+    display: grid;
+    width: 5.5rem;
+    min-height: 5.5rem;
+    place-items: center;
+    padding: 1.25rem .5rem .65rem;
+    border: 2px solid #494641;
+    border-radius: 50% 50% .3rem .3rem / 32% 32% .3rem .3rem;
+    background: linear-gradient(110deg, #706d67, #b0aaa0 34%, #8d8880 70%, #625f5a);
+    box-shadow: 0 .45rem .8rem rgb(0 0 0 / 42%), inset 0 1px rgb(255 255 255 / 55%), inset 0 -3px 5px rgb(0 0 0 / 28%);
+    color: #24221f;
+    cursor: pointer;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    line-height: 1.1;
+    list-style: none;
+    text-align: center;
+    text-shadow: 0 1px rgb(255 255 255 / 45%);
+}
+
+.site-menu-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.site-menu-toggle::before {
+    position: absolute;
+    top: 1rem;
+    width: 2.8rem;
+    height: 1px;
+    background: rgb(45 42 38 / 55%);
+    box-shadow: 0 2px rgb(255 255 255 / 30%);
+    content: "";
+}
+
+.site-menu-toggle:hover,
+.site-menu-toggle:focus-visible {
+    background: linear-gradient(110deg, #88837a, #c0b9ad 34%, #99938a 70%, #716d66);
+}
+
+.site-menu-toggle:focus-visible,
+.site-menu-links a:focus-visible {
+    outline: 3px solid #d5c6b4;
+    outline-offset: 3px;
+}
+
+.site-menu-links {
+    position: absolute;
+    top: calc(100% + .5rem);
+    left: 0;
+    display: grid;
+    width: min(15rem, calc(100vw - 1.5rem));
+    padding: .4rem;
+    border: 2px solid #514d47;
+    border-radius: .35rem 1rem .35rem .35rem;
+    background: linear-gradient(145deg, #b4aea4, #77736c 72%, #625e58);
+    box-shadow: 0 .75rem 1.25rem rgb(0 0 0 / 45%), inset 0 1px rgb(255 255 255 / 40%);
+}
+
+.site-menu-links a {
+    padding: .7rem .75rem;
+    border-bottom: 1px solid rgb(45 42 38 / 25%);
+    color: #211f1c;
+    font-family: 'IM Fell English SC', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    text-shadow: 0 1px rgb(255 255 255 / 35%);
+}
+
+.site-menu-links a:last-child {
+    border-bottom: 0;
+}
+
+.site-menu-links a:hover,
+.site-menu-links a:focus-visible {
+    border-radius: .2rem;
+    background: rgb(255 255 255 / 16%);
 }
 
 .site-header {
@@ -92,6 +185,7 @@ body {
 }
 
 .source-card {
+    scroll-margin-top: 1rem;
     min-width: 0;
     padding: 1rem;
     border: 4px double #777;
@@ -247,6 +341,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
     .refresh-button,
     .source-card,
     .review-artwork {

@@ -1,6 +1,11 @@
 const refreshButton = document.querySelector('#refresh-button');
 const refreshMessage = document.querySelector('#refresh-message');
 const sourceCards = [...document.querySelectorAll('.source-card')];
+const siteMenu = document.querySelector('#site-menu');
+
+siteMenu.addEventListener('click', (event) => {
+    if (event.target.closest('a')) siteMenu.open = false;
+});
 
 function showCardMessage(grid, message, className = '') {
     const element = document.createElement('p');
