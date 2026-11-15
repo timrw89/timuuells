@@ -109,7 +109,7 @@ module.exports = async function handler(request, response) {
 
     response.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=600");
 
-    const apiKey = process.env.NASA_API_KEY;
+    const apiKey = process.env.nasa_api_key;
     const endDate = new Date().toISOString().slice(0, 10);
     const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
     const tasks = NOAA_FEEDS.map((feed) => ({ ...feed, run: () => fetchJson(feed.url, feed.label) }));
@@ -146,7 +146,7 @@ module.exports = async function handler(request, response) {
         });
 
         if (!apiKey) {
-            errors.nasa.push("Set NASA_API_KEY in the Vercel environment to load NASA event data.");
+            errors.nasa.push("Set nasa_api_key in the Vercel environment to load NASA event data.");
         }
 
         const noaaAvailable = NOAA_FEEDS.some((feed) => data[feed.name] !== undefined);
