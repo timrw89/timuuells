@@ -12,4 +12,11 @@ NOAA conditions and forecast data do not require a key. If `NASA_API_KEY` is not
 
 ## Local development
 
-Run the project with the Vercel CLI so the serverless route is available. Set `NASA_API_KEY` in your local shell before starting `vercel dev`; do not commit the key or a populated `.env` file.
+Run the project with the Vercel CLI so the serverless route is available. In PowerShell, set the key in your local shell and start the dev server:
+
+```powershell
+$env:NASA_API_KEY = "your-key"
+npx vercel dev
+```
+
+Do not commit the key or a populated `.env` file.
