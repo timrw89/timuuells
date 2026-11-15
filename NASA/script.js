@@ -137,7 +137,7 @@ async function loadSolarAnimation(alert) {
     solarVideo.load();
     animationStatus.classList.remove("is-warning");
     animationStatus.textContent = `Preparing a time-lapse around the NASA alert from ${alertTime}…`;
-    animationCaption.textContent = `${alert.title || alert.type} · NASA alert issued ${alertTime}. The animation covers the 30 minutes before that timestamp.`;
+    animationCaption.textContent = `${alert.title || alert.type} · NASA alert issued ${alertTime}. The animation covers the 24 hours before that timestamp.`;
 
     if (alert.url) {
         latestAlertLink.href = alert.url;

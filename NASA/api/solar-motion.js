@@ -65,7 +65,7 @@ async function queueMovie(time, type) {
     }
 
     const channel = type === "FLR" ? "131" : "193";
-    const startTime = new Date(eventTime.getTime() - 30 * 60 * 1000).toISOString();
+    const startTime = new Date(eventTime.getTime() - 24 * 60 * 60 * 1000).toISOString();
     const url = new URL("https://api.helioviewer.org/v2/queueMovie/");
     url.search = new URLSearchParams({
         startTime,
@@ -74,7 +74,7 @@ async function queueMovie(time, type) {
         events: "",
         eventsLabels: "false",
         imageScale: "4",
-        cadence: "120",
+        cadence: "1800",
         frameRate: "8",
         movieLength: "6",
         format: "mp4",

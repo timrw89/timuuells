@@ -10,7 +10,7 @@ An Earth-focused space-weather dashboard that reads recent event notifications f
 
 The dashboard summarizes NASA-reported flares, coronal mass ejections, and geomagnetic storms. NASA DONKI provides event alerts rather than continuous solar-wind measurements or a Kp forecast.
 
-The “Sun in motion” section uses NASA DONKI's newest alert timestamp to request a 30-minute SDO/AIA time-lapse from the public [Helioviewer API](https://api.helioviewer.org/docs/v2/). Helioviewer renders a short looping MP4; AIA 131 Å is used for flares and AIA 193 Å for other alerts. Rendering can take a few minutes. The timestamp is the alert issue time, which can differ from the actual event time.
+The “Sun in motion” section uses NASA DONKI's newest alert timestamp to request a 24-hour SDO/AIA time-lapse from the public [Helioviewer API](https://api.helioviewer.org/docs/v2/). Helioviewer renders a short looping MP4; AIA 131 Å is used for flares and AIA 193 Å for other alerts. Rendering can take a few minutes. The timestamp is the alert issue time, which can differ from the actual event time.
 
 ## Local development
 
