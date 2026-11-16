@@ -14,6 +14,7 @@ const satelliteCanvas = document.querySelector("#satellite-canvas");
 const satelliteStatus = document.querySelector("#satellite-status");
 const satelliteCount = document.querySelector("#satellite-count");
 const satelliteRefresh = document.querySelector("#satellite-refresh");
+const earthTexture = new Image();
 
 let isLoading = false;
 let isLoadingAnimation = false;
@@ -32,6 +33,9 @@ const ORBIT_COLORS = {
     medium: "#c6f36b",
     high: "#ffb27b"
 };
+
+earthTexture.addEventListener("load", drawSatelliteScene);
+earthTexture.src = "./earth.svg";
 
 function formatNumber(value) {
     const number = Number(value);
@@ -395,20 +399,9 @@ function drawSatelliteScene() {
     projected.filter((point) => point.depth <= 0).forEach((point) => drawSatellite(point, false));
 
     context.globalAlpha = 1;
-    const earthGradient = context.createRadialGradient(
-        centerX - earthRadius * .36,
-        centerY - earthRadius * .4,
-        earthRadius * .06,
-        centerX,
-        centerY,
-        earthRadius * 1.08
-    );
-    earthGradient.addColorStop(0, "#3b9ab8");
-    earthGradient.addColorStop(.55, "#155276");
-    earthGradient.addColorStop(1, "#07172c");
     context.shadowColor = "rgba(83, 197, 255, .38)";
     context.shadowBlur = 22;
-    context.fillStyle = earthGradient;
+    context.fillStyle = "#0b3158";
     context.beginPath();
     context.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
     context.fill();
@@ -417,24 +410,15 @@ function drawSatelliteScene() {
     context.beginPath();
     context.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
     context.clip();
-    context.strokeStyle = "rgba(151, 231, 255, .19)";
-    context.lineWidth = 1;
-    [-.56, 0, .56].forEach((offset) => {
-        context.beginPath();
-        context.ellipse(
-            centerX,
-            centerY,
-            earthRadius * Math.sqrt(1 - offset * offset),
-            earthRadius * .19,
-            0,
-            0,
-            Math.PI * 2
+    if (earthTexture.complete && earthTexture.naturalWidth > 0) {
+        context.drawImage(
+            earthTexture,
+            centerX - earthRadius,
+            centerY - earthRadius,
+            earthRadius * 2,
+            earthRadius * 2
         );
-        context.stroke();
-    });
-    context.beginPath();
-    context.ellipse(centerX, centerY, earthRadius * .38, earthRadius, 0, 0, Math.PI * 2);
-    context.stroke();
+    }
     context.restore();
 
     projected.filter((point) => point.depth > 0).forEach((point) => drawSatellite(point, true));
