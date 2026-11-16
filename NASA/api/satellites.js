@@ -38,7 +38,14 @@ module.exports = async function handler(request, response) {
             signal: controller.signal
         });
         if (!upstream.ok) {
-            throw new Error(`CelesTrak returned HTTP ${upstream.status}.`);
+            const upstreamMessage = (await upstream.text()).trim().slice(0, 500);
+            const error = new Error(
+                `CelesTrak returned HTTP ${upstream.status}.` +
+                (upstreamMessage ? ` ${upstreamMessage}` : "")
+            );
+            error.upstreamStatus = upstream.status;
+            error.retryAfter = upstream.headers.get("Retry-After");
+            throw error;
         }
 
         const satellites = await upstream.json();
@@ -80,8 +87,12 @@ module.exports = async function handler(request, response) {
         });
     } catch (error) {
         console.error("CelesTrak satellite data request failed.", error);
+        if (error.retryAfter) {
+            response.setHeader("Retry-After", error.retryAfter);
+        }
         return response.status(502).json({
             error: "Active satellite data is temporarily unavailable.",
+            upstreamStatus: error.upstreamStatus || null,
             details: [error.name === "AbortError" ? "The CelesTrak request timed out." : error.message]
         });
     } finally {
