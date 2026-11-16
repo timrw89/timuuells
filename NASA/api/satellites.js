@@ -1,5 +1,5 @@
 const CELESTRAK_URL =
-    "https://celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=JSON";
+    "https://celestrak.org/NORAD/elements/gp.php?GROUP=kuiper&FORMAT=json";
 
 function parseEpoch(value) {
     const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value);
@@ -78,7 +78,7 @@ module.exports = async function handler(request, response) {
         });
 
         if (elements.length === 0) {
-            throw new Error("CelesTrak did not return valid Starlink orbital elements.");
+            throw new Error("CelesTrak did not return valid Kuiper orbital elements.");
         }
 
         return response.status(200).json({
@@ -91,7 +91,7 @@ module.exports = async function handler(request, response) {
             response.setHeader("Retry-After", error.retryAfter);
         }
         return response.status(502).json({
-            error: "Starlink satellite data is temporarily unavailable.",
+            error: "Kuiper satellite data is temporarily unavailable.",
             upstreamStatus: error.upstreamStatus || null,
             details: [error.name === "AbortError" ? "The CelesTrak request timed out." : error.message]
         });
