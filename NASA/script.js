@@ -270,8 +270,10 @@ function renderDashboard(data) {
     document.querySelector("#total-count").textContent = formatNumber(counts.total);
 
     const generatedAt = data.generatedAt || new Date().toISOString();
-    lastUpdated.dateTime = generatedAt;
-    lastUpdated.textContent = formatTime(generatedAt, true);
+    if (lastUpdated) {
+        lastUpdated.dateTime = generatedAt;
+        lastUpdated.textContent = formatTime(generatedAt, true);
+    }
 
     connectionStatus.textContent = "NASA DONKI event feed updated";
     liveIndicator.dataset.state = "live";
