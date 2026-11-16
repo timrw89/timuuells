@@ -449,7 +449,7 @@ async function refreshSatellites() {
     isLoadingSatellites = true;
     satelliteRefresh.disabled = true;
     satelliteStatus.classList.remove("satellite-status-error");
-    satelliteStatus.textContent = "Loading active satellite orbital data…";
+    satelliteStatus.textContent = "Loading Starlink orbital data…";
 
     try {
         const response = await fetch("/api/satellites", {
@@ -458,7 +458,7 @@ async function refreshSatellites() {
         });
         const data = await readResponse(response);
         if (!Array.isArray(data.satellites) || data.satellites.length === 0) {
-            throw new Error("No active satellite orbital data was provided.");
+            throw new Error("No Starlink orbital data was provided.");
         }
 
         satelliteElements = data.satellites
@@ -482,17 +482,17 @@ async function refreshSatellites() {
             });
 
         if (satelliteElements.length === 0) {
-            throw new Error("No valid active satellite orbital elements were provided.");
+            throw new Error("No valid Starlink orbital elements were provided.");
         }
 
         satelliteCount.textContent = formatNumber(satelliteElements.length);
         satelliteStatus.textContent =
-            `Positions estimated from CelesTrak active orbital elements · Updated ${formatTime(data.generatedAt, true)}.`;
+            `Positions estimated from CelesTrak Starlink orbital elements · Updated ${formatTime(data.generatedAt, true)}.`;
         drawSatelliteScene();
     } catch (error) {
-        console.error("Unable to load active satellite data.", error);
+        console.error("Unable to load Starlink satellite data.", error);
         satelliteStatus.textContent =
-            `Satellite positions unavailable; showing the Earth/orbit guide. ${error.message}`;
+            `Starlink positions unavailable; showing the Earth/orbit guide. ${error.message}`;
         satelliteStatus.classList.add("satellite-status-error");
     } finally {
         isLoadingSatellites = false;

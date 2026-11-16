@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Explore NASA space-weather alerts, solar imagery, and a live orbital view of active satellites around Earth.">
+    <meta name="description" content="Explore NASA space-weather alerts, solar imagery, and a live orbital view of Starlink satellites around Earth.">
     <meta name="theme-color" content="#090d16">
-    <title>Earth Space Weather &amp; Satellites — NASA DONKI</title>
+    <title>Earth Space Weather &amp; Starlink — NASA DONKI</title>
     <link rel="stylesheet" href="./styles.css">
     <script src="./script.js" defer></script>
 </head>
@@ -108,20 +108,20 @@
         <section class="dashboard-section satellite-section" aria-labelledby="satellite-title">
             <div class="section-heading">
                 <div>
-                    <p class="section-index">EARTH ORBIT / ACTIVE CATALOG</p>
-                    <h2 id="satellite-title">Satellites around Earth</h2>
+                    <p class="section-index">EARTH ORBIT / STARLINK CONSTELLATION</p>
+                    <h2 id="satellite-title">Starlink satellites around Earth</h2>
                 </div>
                 <button class="refresh-button" id="satellite-refresh" type="button">
                     Refresh positions <span aria-hidden="true">↻</span>
                 </button>
             </div>
             <p class="section-status" id="satellite-status" role="status" aria-live="polite">
-                Loading active satellite orbital data…
+                Loading Starlink orbital data…
             </p>
             <div class="satellite-layout">
                 <div class="satellite-visual">
                     <canvas id="satellite-canvas" role="img" aria-labelledby="satellite-title satellite-caption">
-                        An Earth globe with orbital guide rings. Live satellite positions appear when CelesTrak data is available.
+                        An Earth globe with orbital guide rings. Live Starlink satellite positions appear when CelesTrak data is available.
                     </canvas>
                     <p class="satellite-caption" id="satellite-caption">
                         Orbital distances are compressed for visibility. Live positions are estimated from public
@@ -130,7 +130,7 @@
                 </div>
                 <aside class="satellite-details" aria-label="Satellite visualization details">
                     <p class="satellite-count" id="satellite-count">—</p>
-                    <p class="satellite-count-label">active satellites plotted</p>
+                    <p class="satellite-count-label">Starlink satellites plotted</p>
                     <h3>Orbit altitude</h3>
                     <ul class="orbit-legend">
                         <li><span class="orbit-key orbit-key--low" aria-hidden="true"></span> Low Earth orbit <span>&lt; 2,000 km</span></li>
@@ -148,7 +148,7 @@
     </main>
 
     <footer class="site-footer">
-        <p>NASA DONKI alerts · SDO/AIA imagery via Helioviewer · Active satellite elements from CelesTrak.</p>
+        <p>NASA DONKI alerts · SDO/AIA imagery via Helioviewer · Starlink orbital elements from CelesTrak.</p>
         <span>The animation ends at the alert issue time, which may differ from the event time.</span>
     </footer>
 </body>
