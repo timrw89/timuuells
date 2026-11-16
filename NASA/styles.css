@@ -435,6 +435,129 @@ p {
     line-height: 1.55;
 }
 
+.satellite-section {
+    padding-block: 3.5rem;
+}
+
+.satellite-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    margin-top: 1.25rem;
+}
+
+.satellite-visual {
+    min-width: 0;
+    padding: .6rem;
+    border: 1px solid var(--color-line);
+    border-radius: .35rem;
+    background:
+        radial-gradient(ellipse at 50% 45%, rgb(38 91 135 / 24%), transparent 58%),
+        linear-gradient(145deg, #121c2c, #0b101b 70%);
+}
+
+.satellite-visual canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1.45;
+}
+
+.satellite-caption,
+.satellite-source {
+    margin: .5rem .4rem .3rem;
+    color: var(--color-muted);
+    font-size: .72rem;
+    line-height: 1.55;
+}
+
+.satellite-details {
+    padding: 1.25rem;
+    border: 1px solid var(--color-line);
+    border-radius: .35rem;
+    background: linear-gradient(145deg, rgb(20 30 47 / 92%), rgb(14 20 32 / 96%));
+}
+
+.satellite-count {
+    margin: 0;
+    color: var(--color-cyan);
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 10vw, 3.6rem);
+    line-height: 1;
+}
+
+.satellite-count-label {
+    margin: .45rem 0 1.5rem;
+    color: var(--color-muted);
+    font-size: .76rem;
+}
+
+.satellite-details h3 {
+    margin: 0 0 .9rem;
+    color: var(--color-ink);
+    font-size: .78rem;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.orbit-legend {
+    display: grid;
+    gap: .85rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.orbit-legend li {
+    display: grid;
+    grid-template-columns: .65rem 1fr;
+    align-items: center;
+    gap: .15rem .65rem;
+    color: #d7e0eb;
+    font-size: .75rem;
+}
+
+.orbit-legend li span:last-child {
+    grid-column: 2;
+    color: var(--color-muted);
+    font-size: .68rem;
+}
+
+.orbit-key {
+    width: .55rem;
+    aspect-ratio: 1;
+    grid-row: span 2;
+    border-radius: 50%;
+}
+
+.orbit-key--low {
+    background: var(--color-cyan);
+    box-shadow: 0 0 .7rem rgb(124 232 255 / 55%);
+}
+
+.orbit-key--medium {
+    background: var(--color-lime);
+    box-shadow: 0 0 .7rem rgb(198 243 107 / 45%);
+}
+
+.orbit-key--high {
+    background: var(--color-orange);
+    box-shadow: 0 0 .7rem rgb(255 178 123 / 45%);
+}
+
+.satellite-source {
+    margin: 1.5rem 0 0;
+}
+
+.satellite-source a {
+    color: var(--color-cyan);
+    text-underline-offset: .2em;
+}
+
+.satellite-status-error {
+    color: #ffb27b;
+}
+
 .event-link {
     display: inline-block;
     margin-top: .6rem;
@@ -501,6 +624,12 @@ p {
 
     .metric-grid {
         grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .satellite-layout {
+        grid-template-columns: minmax(0, 1.6fr) minmax(16rem, .7fr);
+        align-items: stretch;
+        gap: 1rem;
     }
 
 }

@@ -12,6 +12,8 @@ The dashboard summarizes NASA-reported flares, coronal mass ejections, and geoma
 
 The “Sun in motion” section uses NASA DONKI's newest alert timestamp to request 24 SDO/AIA PNG images from the public [Helioviewer API](https://api.helioviewer.org/docs/v2/), one per hour across the 24 hours ending at that timestamp. The browser animates the images that load successfully. AIA 131 Å is used for flares and AIA 193 Å for other alerts. The timestamp is the alert issue time, which can differ from the actual event time.
 
+The satellite visualization fetches CelesTrak's active general-perturbations catalog through `/api/satellites`. It estimates current positions with simplified Keplerian propagation and compresses orbital distances for display; it is a visual overview, not a precision tracker or navigation aid.
+
 ## Local development
 
 Run these commands from the `NASA` folder so the Vercel CLI can find the serverless route. In PowerShell, set the key in your local shell and start the dev server:

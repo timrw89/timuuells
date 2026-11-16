@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="NASA-reported solar activity with SDO/AIA time-lapse imagery.">
+    <meta name="description" content="Explore NASA space-weather alerts, solar imagery, and a live orbital view of active satellites around Earth.">
     <meta name="theme-color" content="#090d16">
-    <title>Earth Space Weather — NASA DONKI</title>
+    <title>Earth Space Weather &amp; Satellites — NASA DONKI</title>
     <link rel="stylesheet" href="./styles.css">
     <script src="./script.js" defer></script>
 </head>
@@ -104,10 +104,51 @@
                 View the NASA alert
             </a>
         </section>
+
+        <section class="dashboard-section satellite-section" aria-labelledby="satellite-title">
+            <div class="section-heading">
+                <div>
+                    <p class="section-index">EARTH ORBIT / ACTIVE CATALOG</p>
+                    <h2 id="satellite-title">Satellites around Earth</h2>
+                </div>
+                <button class="refresh-button" id="satellite-refresh" type="button">
+                    Refresh positions <span aria-hidden="true">↻</span>
+                </button>
+            </div>
+            <p class="section-status" id="satellite-status" role="status" aria-live="polite">
+                Loading active satellite orbital data…
+            </p>
+            <div class="satellite-layout">
+                <div class="satellite-visual">
+                    <canvas id="satellite-canvas" role="img" aria-labelledby="satellite-title satellite-caption">
+                        A globe showing the estimated positions of active satellites around Earth.
+                    </canvas>
+                    <p class="satellite-caption" id="satellite-caption">
+                        Each dot represents an active satellite. Orbital distances are compressed for visibility;
+                        positions are estimates, not for navigation.
+                    </p>
+                </div>
+                <aside class="satellite-details" aria-label="Satellite visualization details">
+                    <p class="satellite-count" id="satellite-count">—</p>
+                    <p class="satellite-count-label">active satellites plotted</p>
+                    <h3>Orbit altitude</h3>
+                    <ul class="orbit-legend">
+                        <li><span class="orbit-key orbit-key--low" aria-hidden="true"></span> Low Earth orbit <span>&lt; 2,000 km</span></li>
+                        <li><span class="orbit-key orbit-key--medium" aria-hidden="true"></span> Medium orbit <span>2,000–35,786 km</span></li>
+                        <li><span class="orbit-key orbit-key--high" aria-hidden="true"></span> High / geostationary <span>&gt; 35,786 km</span></li>
+                    </ul>
+                    <p class="satellite-source">
+                        Orbital elements from
+                        <a href="https://celestrak.org/NORAD/elements/" target="_blank" rel="noopener noreferrer">CelesTrak</a>.
+                        The view uses simplified Keplerian propagation and compresses orbital scale.
+                    </p>
+                </aside>
+            </div>
+        </section>
     </main>
 
     <footer class="site-footer">
-        <p>Event timestamps from NASA DONKI; solar imagery from SDO/AIA via Helioviewer.</p>
+        <p>NASA DONKI alerts · SDO/AIA imagery via Helioviewer · Active satellite elements from CelesTrak.</p>
         <span>The animation ends at the alert issue time, which may differ from the event time.</span>
     </footer>
 </body>

@@ -10,14 +10,28 @@ const animationCaption = document.querySelector("#animation-caption");
 const animationFrameTime = document.querySelector("#animation-frame-time");
 const latestAlertLink = document.querySelector("#latest-alert-link");
 const solarFrame = document.querySelector("#solar-frame");
+const satelliteCanvas = document.querySelector("#satellite-canvas");
+const satelliteStatus = document.querySelector("#satellite-status");
+const satelliteCount = document.querySelector("#satellite-count");
+const satelliteRefresh = document.querySelector("#satellite-refresh");
 
 let isLoading = false;
 let isLoadingAnimation = false;
+let isLoadingSatellites = false;
 let animationAlertTime = "";
 let animationRequestId = 0;
 let animationFrames = [];
 let animationFrameIndex = 0;
 let animationInterval = null;
+let satelliteElements = [];
+
+const EARTH_RADIUS_KM = 6371;
+const EARTH_MU_KM3_PER_S2 = 398600.4418;
+const ORBIT_COLORS = {
+    low: "#7ce8ff",
+    medium: "#c6f36b",
+    high: "#ffb27b"
+};
 
 function formatNumber(value) {
     const number = Number(value);
@@ -246,6 +260,245 @@ function renderDashboard(data) {
     void loadSolarAnimation(data.latestAlert);
 }
 
+function getSatellitePosition(satellite, now) {
+    const epoch = Date.parse(satellite.epoch);
+    const meanMotion = satellite.meanMotion * (2 * Math.PI) / 86400;
+    const semiMajorAxis = Math.cbrt(EARTH_MU_KM3_PER_S2 / (meanMotion * meanMotion));
+    const elapsedSeconds = (now - epoch) / 1000;
+    const meanAnomalyValue =
+        satellite.meanAnomaly * Math.PI / 180 + meanMotion * elapsedSeconds;
+    const meanAnomaly = (
+        (meanAnomalyValue % (2 * Math.PI)) + 2 * Math.PI
+    ) % (2 * Math.PI);
+    const eccentricity = satellite.eccentricity;
+    let eccentricAnomaly = eccentricity > .8 ? Math.PI : meanAnomaly;
+
+    for (let iteration = 0; iteration < 12; iteration += 1) {
+        eccentricAnomaly -= (
+            eccentricAnomaly - eccentricity * Math.sin(eccentricAnomaly) - meanAnomaly
+        ) / (1 - eccentricity * Math.cos(eccentricAnomaly));
+    }
+
+    const orbitalX = semiMajorAxis * (Math.cos(eccentricAnomaly) - eccentricity);
+    const orbitalY = semiMajorAxis * Math.sqrt(1 - eccentricity * eccentricity) *
+        Math.sin(eccentricAnomaly);
+    const argument = satellite.argumentOfPerigee * Math.PI / 180;
+    const inclination = satellite.inclination * Math.PI / 180;
+    const ascendingNode = satellite.ascendingNode * Math.PI / 180;
+    const xPerigee = orbitalX * Math.cos(argument) - orbitalY * Math.sin(argument);
+    const yPerigee = orbitalX * Math.sin(argument) + orbitalY * Math.cos(argument);
+    const x = xPerigee * Math.cos(ascendingNode) -
+        yPerigee * Math.cos(inclination) * Math.sin(ascendingNode);
+    const y = xPerigee * Math.sin(ascendingNode) +
+        yPerigee * Math.cos(inclination) * Math.cos(ascendingNode);
+    const z = yPerigee * Math.sin(inclination);
+    const radius = Math.hypot(x, y, z);
+
+    return {
+        x: x / radius,
+        y: y / radius,
+        z: z / radius,
+        altitude: radius - EARTH_RADIUS_KM
+    };
+}
+
+function drawSatelliteScene() {
+    if (!satelliteCanvas || satelliteElements.length === 0) {
+        return;
+    }
+
+    const bounds = satelliteCanvas.getBoundingClientRect();
+    if (bounds.width === 0 || bounds.height === 0) {
+        return;
+    }
+
+    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    satelliteCanvas.width = Math.round(bounds.width * pixelRatio);
+    satelliteCanvas.height = Math.round(bounds.height * pixelRatio);
+    const context = satelliteCanvas.getContext("2d");
+    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
+    const width = bounds.width;
+    const height = bounds.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const earthRadius = Math.min(width, height) * .19;
+    const maximumOrbitRadius = Math.min(width, height) * .43;
+    const maxAltitude = satelliteElements.reduce(
+        (maximum, satellite) => Math.max(maximum, satellite.altitude),
+        1
+    );
+    const yaw = -.48;
+    const pitch = .42;
+    const cosYaw = Math.cos(yaw);
+    const sinYaw = Math.sin(yaw);
+    const cosPitch = Math.cos(pitch);
+    const sinPitch = Math.sin(pitch);
+    const now = Date.now();
+
+    context.clearRect(0, 0, width, height);
+    for (let index = 0; index < 65; index += 1) {
+        const x = (index * 127.1 % 997) / 997 * width;
+        const y = (index * 311.7 % 991) / 991 * height;
+        context.fillStyle = index % 7 === 0 ? "rgba(124, 232, 255, .48)" : "rgba(220, 242, 255, .28)";
+        context.fillRect(x, y, 1, 1);
+    }
+
+    context.save();
+    context.strokeStyle = "rgba(124, 232, 255, .18)";
+    context.lineWidth = 1;
+    [1.23, 1.55, 1.88].forEach((scale, index) => {
+        context.beginPath();
+        context.ellipse(
+            centerX,
+            centerY,
+            earthRadius * scale,
+            earthRadius * scale * .46,
+            index === 1 ? -.22 : .16,
+            0,
+            Math.PI * 2
+        );
+        context.stroke();
+    });
+
+    const projected = satelliteElements.map((satellite) => {
+        const position = getSatellitePosition(satellite, now);
+        const altitudeRatio = Math.log1p(Math.max(0, position.altitude) / EARTH_RADIUS_KM) /
+            Math.log1p(Math.max(1, maxAltitude) / EARTH_RADIUS_KM);
+        const displayRadius = earthRadius +
+            (maximumOrbitRadius - earthRadius) * altitudeRatio;
+        const rotatedX = position.x * cosYaw - position.z * sinYaw;
+        const depth = position.x * sinYaw + position.z * cosYaw;
+        const rotatedY = position.y * cosPitch - depth * sinPitch;
+        const screenX = centerX + rotatedX * displayRadius;
+        const screenY = centerY + rotatedY * displayRadius;
+        const screenDistance = Math.hypot(screenX - centerX, screenY - centerY);
+        const orbitClass = position.altitude < 2000
+            ? "low"
+            : position.altitude < 35786 ? "medium" : "high";
+
+        return { screenX, screenY, depth, screenDistance, orbitClass };
+    });
+
+    function drawSatellite(point, isFront) {
+        if (!isFront && point.screenDistance < earthRadius * 1.02) {
+            return;
+        }
+
+        context.globalAlpha = isFront ? .88 : .3;
+        context.fillStyle = ORBIT_COLORS[point.orbitClass];
+        context.beginPath();
+        context.arc(point.screenX, point.screenY, isFront ? 1.7 : 1.15, 0, Math.PI * 2);
+        context.fill();
+    }
+
+    projected.filter((point) => point.depth <= 0).forEach((point) => drawSatellite(point, false));
+
+    context.globalAlpha = 1;
+    const earthGradient = context.createRadialGradient(
+        centerX - earthRadius * .36,
+        centerY - earthRadius * .4,
+        earthRadius * .06,
+        centerX,
+        centerY,
+        earthRadius * 1.08
+    );
+    earthGradient.addColorStop(0, "#3b9ab8");
+    earthGradient.addColorStop(.55, "#155276");
+    earthGradient.addColorStop(1, "#07172c");
+    context.shadowColor = "rgba(83, 197, 255, .38)";
+    context.shadowBlur = 22;
+    context.fillStyle = earthGradient;
+    context.beginPath();
+    context.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
+    context.fill();
+    context.shadowBlur = 0;
+    context.save();
+    context.beginPath();
+    context.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
+    context.clip();
+    context.strokeStyle = "rgba(151, 231, 255, .19)";
+    context.lineWidth = 1;
+    [-.56, 0, .56].forEach((offset) => {
+        context.beginPath();
+        context.ellipse(
+            centerX,
+            centerY,
+            earthRadius * Math.sqrt(1 - offset * offset),
+            earthRadius * .19,
+            0,
+            0,
+            Math.PI * 2
+        );
+        context.stroke();
+    });
+    context.beginPath();
+    context.ellipse(centerX, centerY, earthRadius * .38, earthRadius, 0, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+
+    projected.filter((point) => point.depth > 0).forEach((point) => drawSatellite(point, true));
+    context.restore();
+}
+
+async function refreshSatellites() {
+    if (isLoadingSatellites) {
+        return;
+    }
+
+    isLoadingSatellites = true;
+    satelliteRefresh.disabled = true;
+    satelliteStatus.classList.remove("satellite-status-error");
+    satelliteStatus.textContent = "Loading active satellite orbital data…";
+
+    try {
+        const response = await fetch("/api/satellites", {
+            headers: { Accept: "application/json" },
+            cache: "no-store"
+        });
+        const data = await readResponse(response);
+        if (!Array.isArray(data.satellites) || data.satellites.length === 0) {
+            throw new Error("No active satellite orbital data was provided.");
+        }
+
+        satelliteElements = data.satellites
+            .filter((satellite) =>
+                Number.isFinite(Date.parse(satellite.epoch)) &&
+                Number.isFinite(satellite.meanMotion) &&
+                satellite.meanMotion > 0 &&
+                Number.isFinite(satellite.eccentricity) &&
+                satellite.eccentricity >= 0 &&
+                satellite.eccentricity < 1
+            )
+            .map((satellite) => {
+                const meanMotion = satellite.meanMotion * (2 * Math.PI) / 86400;
+                const semiMajorAxis = Math.cbrt(
+                    EARTH_MU_KM3_PER_S2 / (meanMotion * meanMotion)
+                );
+                return {
+                    ...satellite,
+                    altitude: semiMajorAxis * (1 - satellite.eccentricity) - EARTH_RADIUS_KM
+                };
+            });
+
+        if (satelliteElements.length === 0) {
+            throw new Error("No valid active satellite orbital elements were provided.");
+        }
+
+        satelliteCount.textContent = formatNumber(satelliteElements.length);
+        satelliteStatus.textContent =
+            `Positions estimated from CelesTrak active orbital elements · Updated ${formatTime(data.generatedAt, true)}.`;
+        drawSatelliteScene();
+    } catch (error) {
+        console.error("Unable to load active satellite data.", error);
+        satelliteStatus.textContent = error.message;
+        satelliteStatus.classList.add("satellite-status-error");
+    } finally {
+        isLoadingSatellites = false;
+        satelliteRefresh.disabled = false;
+    }
+}
+
 async function refreshDashboard() {
     if (isLoading) {
         return;
@@ -286,5 +539,8 @@ animationToggle.addEventListener("click", () => {
 });
 
 refreshButton.addEventListener("click", refreshDashboard);
+satelliteRefresh.addEventListener("click", refreshSatellites);
+window.addEventListener("resize", drawSatelliteScene);
 refreshDashboard();
+refreshSatellites();
 window.setInterval(refreshDashboard, 5 * 60 * 1000);
