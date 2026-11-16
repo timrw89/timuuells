@@ -1,5 +1,5 @@
 const CELESTRAK_URL =
-    "https://celestrak.org/NORAD/elements/gp.php?GROUP=kuiper&FORMAT=json";
+    "https://celestrak.org/NORAD/elements/gp.php?GROUP=last-30-days&FORMAT=json";
 
 function parseEpoch(value) {
     const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value);
@@ -62,7 +62,7 @@ module.exports = async function handler(request, response) {
                 ? satellite.OBJECT_NAME.trim()
                 : catalogId
                     ? `Catalog object ${catalogId}`
-                    : "Unidentified active object";
+                    : "Unidentified catalog object";
 
             return {
                 name,
@@ -78,7 +78,7 @@ module.exports = async function handler(request, response) {
         });
 
         if (elements.length === 0) {
-            throw new Error("CelesTrak did not return valid Kuiper orbital elements.");
+            throw new Error("CelesTrak did not return valid last-30-days orbital elements.");
         }
 
         return response.status(200).json({
@@ -91,7 +91,7 @@ module.exports = async function handler(request, response) {
             response.setHeader("Retry-After", error.retryAfter);
         }
         return response.status(502).json({
-            error: "Kuiper satellite data is temporarily unavailable.",
+            error: "Recent satellite data is temporarily unavailable.",
             upstreamStatus: error.upstreamStatus || null,
             details: [error.name === "AbortError" ? "The CelesTrak request timed out." : error.message]
         });

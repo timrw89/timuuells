@@ -94,12 +94,19 @@ module.exports = async function handler(request, response) {
         const latestAlert = sortedNotifications.length > 0
             ? normalizeNotification(sortedNotifications[0])
             : null;
+        const latestFlareNotification = sortedNotifications.find(
+            (notification) => notification.messageType === "FLR"
+        );
         const types = notifications.map((notification) => notification.messageType);
 
         return response.status(200).json({
             generatedAt: new Date().toISOString(),
             windowStart: startDate,
             windowEnd: endDate,
+            notifications: sortedNotifications.slice(0, 8).map(normalizeNotification),
+            latestFlare: latestFlareNotification
+                ? normalizeNotification(latestFlareNotification)
+                : null,
             counts: {
                 flares: types.filter((type) => type === "FLR").length,
                 cmes: types.filter((type) => type === "CME" || type === "WSAEnlilSimulations").length,

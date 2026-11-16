@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Explore NASA space-weather alerts, solar imagery, and a live orbital view of Kuiper satellites around Earth.">
+    <meta name="description" content="Track auroras and Earth's magnetic environment, explore NASA solar alerts, and view CelesTrak's last-30-days satellite group.">
     <meta name="theme-color" content="#090d16">
-    <title>Earth Space Weather &amp; Kuiper — NASA DONKI</title>
+    <title>Space Weather — NASA DONKI</title>
     <link rel="stylesheet" href="./styles.css">
     <script src="./script.js" defer></script>
 </head>
@@ -14,15 +14,15 @@
 
     <header class="site-header">
         <a class="back-link" href="../index.html"><span aria-hidden="true">←</span> Portfolio</a>
-        <p class="header-label">NASA / SPACE WEATHER</p>
+        <p class="header-label">SPACE WEATHER / EARTH / SUN / ORBIT</p>
     </header>
 
     <main id="main">
         <section class="hero" aria-labelledby="page-title">
             <div class="hero-copy">
-                <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> NASA space-weather alerts</p>
-                <h1 id="page-title">The Sun,<br><em>in motion.</em></h1>
-                <p class="hero-description">Follow NASA-reported solar flares, coronal mass ejections, and geomagnetic activity from the past week.</p>
+                <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> EARTH, SUN &amp; SPACE WEATHER</p>
+                <h1 id="page-title">Space<br><em>weather.</em></h1>
+                <p class="hero-description">See how solar activity shapes auroras and Earth's magnetic environment, explore NASA event reports, and view satellites in CelesTrak's last-30-days group.</p>
                 <div class="live-status">
                     <span class="live-indicator" id="live-indicator" aria-hidden="true"></span>
                     <p id="connection-status" role="status" aria-live="polite">Connecting to NASA DONKI…</p>
@@ -35,20 +35,72 @@
                 <span class="earth" aria-hidden="true"></span>
                 <span class="solar-wind" aria-hidden="true"></span>
                 <div class="visual-caption">
-                    <span>NASA DONKI ACTIVITY</span>
+                    <span>EARTH'S MAGNETIC ENVIRONMENT</span>
                     <time id="last-updated">Waiting for data</time>
                 </div>
             </aside>
         </section>
 
+        <section class="dashboard-section conditions-section" aria-labelledby="conditions-title">
+            <div class="section-heading">
+                <div>
+                    <p class="section-index">LIVE CONDITIONS / NOAA SWPC + NASA DONKI</p>
+                    <h2 id="conditions-title">Earth under the Sun</h2>
+                </div>
+                <button class="refresh-button" id="conditions-refresh" type="button">
+                    Refresh conditions <span aria-hidden="true">↻</span>
+                </button>
+            </div>
+            <p class="section-status" id="conditions-status" role="status" aria-live="polite">
+                Loading aurora and magnetic-field data…
+            </p>
+            <div class="conditions-layout">
+                <div class="aurora-visual">
+                    <canvas id="aurora-canvas" role="img" aria-labelledby="conditions-title aurora-caption">
+                        Earth with the forecast auroral regions plotted on the visible hemisphere.
+                    </canvas>
+                    <p class="satellite-caption" id="aurora-caption">
+                        NOAA OVATION aurora forecast on a textured Earth illustration. Aurora probabilities are a forecast, not a live photograph.
+                    </p>
+                </div>
+                <div class="conditions-metrics">
+                    <article class="metric-card">
+                        <p class="metric-label">Peak aurora probability</p>
+                        <p class="metric-reading"><span id="aurora-peak">—</span><span class="metric-unit">%</span></p>
+                        <p class="metric-note">NOAA OVATION forecast</p>
+                        <time class="condition-time" id="aurora-time">Waiting for forecast</time>
+                    </article>
+                    <article class="metric-card">
+                        <p class="metric-label">Interplanetary Bz</p>
+                        <p class="metric-reading"><span id="bz-value">—</span><span class="metric-unit">nT</span></p>
+                        <p class="metric-note">GSM north-south magnetic field</p>
+                        <time class="condition-time" id="magnetic-time">Waiting for measurement</time>
+                    </article>
+                    <article class="metric-card">
+                        <p class="metric-label">Total magnetic field</p>
+                        <p class="metric-reading"><span id="bt-value">—</span><span class="metric-unit">nT</span></p>
+                        <p class="metric-note">Solar-wind magnetic-field strength</p>
+                    </article>
+                    <article class="metric-card flare-summary-card">
+                        <p class="metric-label">Latest NASA flare</p>
+                        <p class="flare-summary" id="latest-flare-title">Waiting for NASA DONKI…</p>
+                        <time class="condition-time" id="latest-flare-time"></time>
+                    </article>
+                </div>
+            </div>
+            <p class="data-note" id="conditions-note">
+                Aurora and magnetic-field measurements from NOAA SWPC; solar-flare reports from NASA DONKI.
+            </p>
+        </section>
+
         <section class="dashboard-section" aria-labelledby="activity-title">
             <div class="section-heading">
                 <div>
-                    <p class="section-index">PAST 7 DAYS</p>
-                    <h2 id="activity-title">Solar activity</h2>
+                    <p class="section-index">NASA DONKI / PAST 7 DAYS</p>
+                    <h2 id="activity-title">Solar events &amp; imagery</h2>
                 </div>
                 <button class="refresh-button" id="refresh-button" type="button">
-                    Refresh <span aria-hidden="true">↻</span>
+                    Refresh NASA data <span aria-hidden="true">↻</span>
                 </button>
             </div>
 
@@ -75,53 +127,56 @@
                 </article>
             </div>
             <p class="data-note" id="nasa-note">Fetching recent event alerts from NASA DONKI…</p>
-        </section>
 
-        <section class="dashboard-section solar-motion-section" aria-labelledby="solar-motion-title">
-            <div class="section-heading">
-                <div>
-                    <p class="section-index">MOST RECENT DONKI TIMESTAMP</p>
-                    <h2 id="solar-motion-title">The Sun in motion</h2>
+            <div class="notification-list" id="nasa-notifications" aria-live="polite">
+                <p class="section-status">Loading recent NASA notifications…</p>
+            </div>
+
+            <div class="solar-motion-panel" aria-labelledby="solar-motion-title">
+                <div class="section-heading subsection-heading">
+                    <div>
+                        <p class="section-index">SDO / AIA · HELIOVIEWER</p>
+                        <h3 id="solar-motion-title">The Sun in motion</h3>
+                    </div>
+                    <button class="refresh-button" id="animation-toggle" type="button" disabled>
+                        Play animation
+                    </button>
                 </div>
-                <p class="section-aside">SDO / AIA · Helioviewer</p>
-                <button class="refresh-button" id="animation-toggle" type="button" disabled>
-                    Play animation
-                </button>
+                <p class="section-status" id="animation-status" role="status" aria-live="polite">
+                    Waiting for a recent NASA alert…
+                </p>
+                <div class="solar-animation">
+                    <img id="solar-frame" alt="" hidden>
+                </div>
+                <time class="animation-frame-time" id="animation-frame-time" aria-live="off">
+                    Waiting for solar images…
+                </time>
+                <p class="animation-caption" id="animation-caption">
+                    One image per hour across the 24 hours ending at the latest NASA alert.
+                </p>
+                <a class="event-link" id="latest-alert-link" target="_blank" rel="noopener noreferrer" hidden>
+                    View the NASA alert
+                </a>
             </div>
-            <p class="section-status" id="animation-status" role="status" aria-live="polite">
-                Waiting for a recent NASA alert…
-            </p>
-            <div class="solar-animation">
-                <img id="solar-frame" alt="" hidden>
-            </div>
-            <time class="animation-frame-time" id="animation-frame-time" aria-live="off">
-                Waiting for solar images…
-            </time>
-            <p class="animation-caption" id="animation-caption">
-                One image per hour across the 24 hours ending at the latest NASA alert.
-            </p>
-            <a class="event-link" id="latest-alert-link" target="_blank" rel="noopener noreferrer" hidden>
-                View the NASA alert
-            </a>
         </section>
 
         <section class="dashboard-section satellite-section" aria-labelledby="satellite-title">
             <div class="section-heading">
                 <div>
-                    <p class="section-index">EARTH ORBIT / KUIPER CONSTELLATION</p>
-                    <h2 id="satellite-title">Kuiper satellites around Earth</h2>
+                    <p class="section-index">CELESTRAK / LAST 30 DAYS</p>
+                    <h2 id="satellite-title">CelesTrak last-30-days satellites</h2>
                 </div>
                 <button class="refresh-button" id="satellite-refresh" type="button">
                     Refresh positions <span aria-hidden="true">↻</span>
                 </button>
             </div>
             <p class="section-status" id="satellite-status" role="status" aria-live="polite">
-                Loading Kuiper orbital data…
+                Loading CelesTrak last-30-days orbital data…
             </p>
             <div class="satellite-layout">
                 <div class="satellite-visual">
                     <canvas id="satellite-canvas" role="img" aria-labelledby="satellite-title satellite-caption">
-                        An Earth globe with orbital guide rings. Live Kuiper satellite positions appear when CelesTrak data is available.
+                        An Earth globe with positions for objects in CelesTrak's last-30-days group.
                     </canvas>
                     <p class="satellite-caption" id="satellite-caption">
                         Orbital distances are compressed for visibility. Live positions are estimated from public
@@ -130,7 +185,7 @@
                 </div>
                 <aside class="satellite-details" aria-label="Satellite visualization details">
                     <p class="satellite-count" id="satellite-count">—</p>
-                    <p class="satellite-count-label">Kuiper satellites plotted</p>
+                    <p class="satellite-count-label">group objects plotted</p>
                     <h3>Orbit altitude</h3>
                     <ul class="orbit-legend">
                         <li><span class="orbit-key orbit-key--low" aria-hidden="true"></span> Low Earth orbit <span>&lt; 2,000 km</span></li>
@@ -148,7 +203,7 @@
     </main>
 
     <footer class="site-footer">
-        <p>NASA DONKI alerts · SDO/AIA imagery via Helioviewer · Kuiper orbital elements from CelesTrak.</p>
+        <p>NOAA SWPC live conditions · NASA DONKI alerts and imagery · Recent orbital elements from CelesTrak.</p>
         <span>The animation ends at the alert issue time, which may differ from the event time.</span>
     </footer>
 </body>
