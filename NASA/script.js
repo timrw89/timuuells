@@ -453,8 +453,7 @@ async function refreshSatellites() {
 
     try {
         const response = await fetch("/api/satellites", {
-            headers: { Accept: "application/json" },
-            cache: "no-store"
+            headers: { Accept: "application/json" }
         });
         const data = await readResponse(response);
         if (!Array.isArray(data.satellites) || data.satellites.length === 0) {
