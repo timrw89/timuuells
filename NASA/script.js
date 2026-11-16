@@ -303,7 +303,7 @@ function getSatellitePosition(satellite, now) {
 }
 
 function drawSatelliteScene() {
-    if (!satelliteCanvas || satelliteElements.length === 0) {
+    if (!satelliteCanvas) {
         return;
     }
 
@@ -491,7 +491,8 @@ async function refreshSatellites() {
         drawSatelliteScene();
     } catch (error) {
         console.error("Unable to load active satellite data.", error);
-        satelliteStatus.textContent = error.message;
+        satelliteStatus.textContent =
+            `Satellite positions unavailable; showing the Earth/orbit guide. ${error.message}`;
         satelliteStatus.classList.add("satellite-status-error");
     } finally {
         isLoadingSatellites = false;
@@ -541,6 +542,7 @@ animationToggle.addEventListener("click", () => {
 refreshButton.addEventListener("click", refreshDashboard);
 satelliteRefresh.addEventListener("click", refreshSatellites);
 window.addEventListener("resize", drawSatelliteScene);
+drawSatelliteScene();
 refreshDashboard();
 refreshSatellites();
 window.setInterval(refreshDashboard, 5 * 60 * 1000);
