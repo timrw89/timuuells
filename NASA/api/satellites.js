@@ -1,5 +1,5 @@
 const CELESTRAK_URL =
-    "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=json";
+    "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=JSON";
 
 function parseEpoch(value) {
     const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(value);
@@ -8,7 +8,6 @@ function parseEpoch(value) {
 
 function isValidSatellite(satellite) {
     return satellite &&
-        typeof satellite.OBJECT_NAME === "string" &&
         typeof satellite.EPOCH === "string" &&
         Number.isFinite(parseEpoch(satellite.EPOCH).getTime()) &&
         Number.isFinite(satellite.MEAN_MOTION) &&
@@ -28,7 +27,7 @@ module.exports = async function handler(request, response) {
         return response.status(405).json({ error: "Method not allowed." });
     }
 
-    response.setHeader("Cache-Control", "s-maxage=3600, stale-while-revalidate=21600");
+    response.setHeader("Cache-Control", "s-maxage=10800, stale-while-revalidate=86400");
 
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
@@ -47,16 +46,29 @@ module.exports = async function handler(request, response) {
             throw new Error("CelesTrak returned data in an unsupported format.");
         }
 
-        const elements = satellites.filter(isValidSatellite).map((satellite) => ({
-            name: satellite.OBJECT_NAME,
-            epoch: parseEpoch(satellite.EPOCH).toISOString(),
-            meanMotion: satellite.MEAN_MOTION,
-            eccentricity: satellite.ECCENTRICITY,
-            inclination: satellite.INCLINATION,
-            ascendingNode: satellite.RA_OF_ASC_NODE,
-            argumentOfPerigee: satellite.ARG_OF_PERICENTER,
-            meanAnomaly: satellite.MEAN_ANOMALY
-        }));
+        const elements = satellites.filter(isValidSatellite).map((satellite) => {
+            const catalogId = satellite.NORAD_CAT_ID == null
+                ? ""
+                : String(satellite.NORAD_CAT_ID);
+            const name = typeof satellite.OBJECT_NAME === "string" &&
+                satellite.OBJECT_NAME.trim()
+                ? satellite.OBJECT_NAME.trim()
+                : catalogId
+                    ? `Catalog object ${catalogId}`
+                    : "Unidentified active object";
+
+            return {
+                name,
+                catalogId,
+                epoch: parseEpoch(satellite.EPOCH).toISOString(),
+                meanMotion: satellite.MEAN_MOTION,
+                eccentricity: satellite.ECCENTRICITY,
+                inclination: satellite.INCLINATION,
+                ascendingNode: satellite.RA_OF_ASC_NODE,
+                argumentOfPerigee: satellite.ARG_OF_PERICENTER,
+                meanAnomaly: satellite.MEAN_ANOMALY
+            };
+        });
 
         if (elements.length === 0) {
             throw new Error("CelesTrak did not return valid active satellite orbital elements.");
