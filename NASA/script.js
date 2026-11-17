@@ -605,18 +605,6 @@ async function refreshDashboard() {
     }
 }
 
-animationToggle.addEventListener("click", () => {
-    if (animationInterval === null) {
-        playAnimation();
-        animationStatus.textContent = "Playing the solar time-lapse.";
-    } else {
-        stopAnimation();
-        animationToggle.textContent = "Play animation";
-        animationStatus.textContent = "Solar time-lapse paused.";
-    }
-});
-
-refreshButton.addEventListener("click", refreshDashboard);
 epicRefresh.addEventListener("click", refreshEpic);
 epicPrev.addEventListener("click", () => {
     stopEpicAnimation();
@@ -641,7 +629,181 @@ window.addEventListener("resize", () => {
     drawSatelliteScene();
 });
 drawSatelliteScene();
-refreshDashboard();
 refreshEpic();
 refreshSatellites();
-window.setInterval(refreshDashboard, 5 * 60 * 1000);
+
+const timelineCanvas = document.querySelector("#timeline-canvas");
+const timelinePlayer = document.querySelector("#timeline-player");
+const timelineDate = document.querySelector("#timeline-date");
+const timelineBadge = document.querySelector("#timeline-badge");
+const timelineDetail = document.querySelector("#timeline-detail");
+const timelinePlay = document.querySelector("#timeline-play");
+const timelineRestart = document.querySelector("#timeline-restart");
+const timelineScrubber = document.querySelector("#timeline-scrubber");
+const timelineRangeLabel = document.querySelector("#timeline-range-label");
+const timelineSpeed = document.querySelector("#timeline-speed");
+
+const timelineColors = { FLR: "#ff9f1c", HSS: "#00f5d4", GST: "#f72585" };
+const timelineLabels = { FLR: "Solar flare", HSS: "High-speed stream", GST: "Geomagnetic storm" };
+let timelineEvents = [];
+let timelineIndex = 0;
+let timelinePlaying = true;
+let timelineStepMs = 280;
+let timelineLastStep = 0;
+let timelinePulses = [];
+let timelineStars = [];
+let timelineMin = 0;
+let timelineMax = 1;
+
+function resizeTimeline() {
+    if (!timelineCanvas) return;
+    const bounds = timelineCanvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    timelineCanvas.width = Math.round(bounds.width * dpr);
+    timelineCanvas.height = Math.round(bounds.height * dpr);
+    const context = timelineCanvas.getContext("2d");
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    timelineStars = Array.from({ length: 120 }, () => ({
+        x: Math.random() * bounds.width,
+        y: Math.random() * bounds.height,
+        r: Math.random() * 1.2 + .25,
+        alpha: Math.random() * .5 + .15
+    }));
+}
+
+function triggerTimelineEvent(index) {
+    if (!timelineEvents[index]) return;
+    const event = timelineEvents[index];
+    timelineDate.textContent = `${event.date} ${event.time} UTC`;
+    timelineBadge.textContent = timelineLabels[event.type] || event.type;
+    timelineBadge.style.color = timelineColors[event.type];
+    timelineDetail.textContent = event.detail;
+    timelineScrubber.value = String(index);
+
+    const width = timelineCanvas.getBoundingClientRect().width;
+    const progress = (event.timestamp - timelineMin) / (timelineMax - timelineMin || 1);
+    const x = 60 + progress * Math.max(1, width - 120);
+    const centerY = 260;
+    const laneY = centerY + (event.type === "FLR" ? -70 : event.type === "GST" ? 70 : 0);
+    timelinePulses.push({
+        x,
+        y: laneY,
+        color: timelineColors[event.type] || "#38bdf8",
+        radius: 4,
+        maxRadius: 18 + event.intensity * 5,
+        alpha: 1
+    });
+}
+
+function drawTimeline(now) {
+    if (!timelineCanvas) return;
+    window.requestAnimationFrame(drawTimeline);
+    const bounds = timelineCanvas.getBoundingClientRect();
+    if (bounds.width === 0 || bounds.height === 0) return;
+    const context = timelineCanvas.getContext("2d");
+
+    if (timelinePlaying && timelineEvents.length > 0 && now - timelineLastStep >= timelineStepMs) {
+        triggerTimelineEvent(timelineIndex);
+        timelineIndex = (timelineIndex + 1) % timelineEvents.length;
+        timelineLastStep = now;
+    }
+
+    context.fillStyle = "rgba(5, 7, 14, .24)";
+    context.fillRect(0, 0, bounds.width, bounds.height);
+    timelineStars.forEach((star) => {
+        context.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+        context.beginPath();
+        context.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        context.fill();
+    });
+
+    const centerY = 260;
+    const usableWidth = Math.max(1, bounds.width - 120);
+    ["FLR", "HSS", "GST"].forEach((type) => {
+        const laneY = centerY + (type === "FLR" ? -70 : type === "GST" ? 70 : 0);
+        context.strokeStyle = "rgba(255, 255, 255, .08)";
+        context.beginPath();
+        context.moveTo(60, laneY);
+        context.lineTo(bounds.width - 60, laneY);
+        context.stroke();
+    });
+
+    timelineEvents.forEach((event, index) => {
+        if (index > timelineIndex) return;
+        const progress = (event.timestamp - timelineMin) / (timelineMax - timelineMin || 1);
+        const x = 60 + progress * usableWidth;
+        const laneY = centerY + (event.type === "FLR" ? -70 : event.type === "GST" ? 70 : 0);
+        context.fillStyle = timelineColors[event.type] || "#38bdf8";
+        context.globalAlpha = index === timelineIndex - 1 ? 1 : .35;
+        context.beginPath();
+        context.arc(x, laneY, index === timelineIndex - 1 ? 5 : 2.5, 0, Math.PI * 2);
+        context.fill();
+    });
+    context.globalAlpha = 1;
+
+    for (let index = timelinePulses.length - 1; index >= 0; index -= 1) {
+        const pulse = timelinePulses[index];
+        pulse.radius += (pulse.maxRadius - pulse.radius) * .08;
+        pulse.alpha -= .018;
+        if (pulse.alpha <= 0) {
+            timelinePulses.splice(index, 1);
+            continue;
+        }
+        context.strokeStyle = pulse.color;
+        context.globalAlpha = pulse.alpha;
+        context.lineWidth = 2;
+        context.beginPath();
+        context.arc(pulse.x, pulse.y, pulse.radius, 0, Math.PI * 2);
+        context.stroke();
+    }
+    context.globalAlpha = 1;
+}
+
+async function loadTimeline() {
+    try {
+        const response = await fetch("/api/timeline", {
+            headers: { Accept: "application/json" },
+            cache: "no-store"
+        });
+        const data = await readResponse(response);
+        timelineEvents = Array.isArray(data.events) ? data.events : [];
+        if (timelineEvents.length === 0) {
+            timelineRangeLabel.textContent = "No space-weather events were returned.";
+            timelinePlayer.setAttribute("aria-busy", "false");
+            return;
+        }
+        timelineMin = timelineEvents[0].timestamp;
+        timelineMax = timelineEvents[timelineEvents.length - 1].timestamp;
+        timelineScrubber.max = String(timelineEvents.length - 1);
+        timelineRangeLabel.textContent =
+            `${data.startDate} to ${data.endDate} · ${timelineEvents.length} events`;
+        timelinePlayer.setAttribute("aria-busy", "false");
+        resizeTimeline();
+        triggerTimelineEvent(0);
+        window.requestAnimationFrame(drawTimeline);
+    } catch (error) {
+        console.error("Unable to load NASA timeline.", error);
+        timelineRangeLabel.textContent = error.message;
+        timelinePlayer.setAttribute("aria-busy", "false");
+    }
+}
+
+timelinePlay.addEventListener("click", () => {
+    timelinePlaying = !timelinePlaying;
+    timelinePlay.textContent = timelinePlaying ? "Pause" : "Play";
+});
+timelineRestart.addEventListener("click", () => {
+    timelineIndex = 0;
+    timelinePulses = [];
+    triggerTimelineEvent(0);
+});
+timelineScrubber.addEventListener("input", (event) => {
+    timelineIndex = Math.max(0, Math.min(timelineEvents.length - 1, Number(event.target.value)));
+    triggerTimelineEvent(timelineIndex);
+});
+timelineSpeed.addEventListener("change", (event) => {
+    timelineStepMs = Number(event.target.value);
+});
+window.addEventListener("resize", resizeTimeline);
+resizeTimeline();
+loadTimeline();

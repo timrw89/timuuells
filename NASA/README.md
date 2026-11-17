@@ -10,7 +10,7 @@ An Earth and space-weather dashboard for NASA EPIC imagery, recent NASA event re
 
 The Earth section fetches one natural-color EPIC image for each of the latest seven available days through `/api/epic`. The images play as an animated carousel and can be paused or stepped manually.
 
-The NASA DONKI section summarizes notifications from the past seven days and lists recent reports. Its “Sun in motion” subsection uses the newest alert timestamp to request 24 SDO/AIA PNG images from the public [Helioviewer API](https://api.helioviewer.org/docs/v2/), one per hour across the 24 hours ending at that timestamp. The browser animates the images that load successfully. AIA 131 Å is used for flares and AIA 193 Å for other alerts. The timestamp is the alert issue time, which can differ from the actual event time.
+The space-weather timeline retrieves FLR, HSS, and GST events from NASA DONKI for the past 365 days through `/api/timeline`. Events play sequentially in separate lanes, with pulsing markers, playback controls, a scrubber, and speed selection.
 
 The satellite section fetches CelesTrak's `last-30-days` general-perturbations group as OMM JSON through `/api/satellites`, preserving catalog IDs beyond the legacy five-digit TLE limit. The response is cached for three hours; CelesTrak updates GP data every two hours, so avoid repeated downloads and surface upstream failures rather than retrying automatically. A local Earth SVG provides shaded oceans, continents, and cloud details beneath the satellite markers. The browser estimates positions with simplified Keplerian propagation and compresses orbital distances for display. CelesTrak's GP elements use the SGP4 model, so this visualization is an overview, not a precision tracker or navigation aid.
 

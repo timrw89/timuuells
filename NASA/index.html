@@ -59,66 +59,41 @@
             </div>
         </section>
 
-        <section class="dashboard-section" aria-labelledby="activity-title">
+        <section class="dashboard-section timeline-section" aria-labelledby="activity-title">
             <div class="section-heading">
                 <div>
-                    <p class="section-index">NASA DONKI / PAST 7 DAYS</p>
-                    <h2 id="activity-title">Solar events &amp; imagery</h2>
+                    <p class="section-index">NASA DONKI / PAST 365 DAYS</p>
+                    <h2 id="activity-title">Space weather timeline</h2>
                 </div>
-                <button class="refresh-button" id="refresh-button" type="button">
-                    Refresh NASA data <span aria-hidden="true">↻</span>
-                </button>
             </div>
-
-            <div class="metric-grid" id="metric-grid" aria-busy="true">
-                <article class="metric-card">
-                    <p class="metric-label">Solar flares</p>
-                    <p class="metric-reading"><span id="flare-count">—</span><span class="metric-unit">alerts</span></p>
-                    <p class="metric-note">NASA flare notifications</p>
-                </article>
-                <article class="metric-card">
-                    <p class="metric-label">Coronal mass ejections</p>
-                    <p class="metric-reading"><span id="cme-count">—</span><span class="metric-unit">alerts</span></p>
-                    <p class="metric-note">NASA CME reports and simulations</p>
-                </article>
-                <article class="metric-card">
-                    <p class="metric-label">Geomagnetic storms</p>
-                    <p class="metric-reading"><span id="storm-count">—</span><span class="metric-unit">alerts</span></p>
-                    <p class="metric-note">NASA storm notifications</p>
-                </article>
-                <article class="metric-card">
-                    <p class="metric-label">Total NASA alerts</p>
-                    <p class="metric-reading"><span id="total-count">—</span><span class="metric-unit">reports</span></p>
-                    <p class="metric-note">All DONKI notifications in this period</p>
-                </article>
-            </div>
-            <p class="data-note" id="nasa-note">Fetching recent event alerts from NASA DONKI…</p>
-
-            <div class="solar-motion-panel" aria-labelledby="solar-motion-title">
-                <div class="section-heading subsection-heading">
-                    <div>
-                        <p class="section-index">SDO / AIA · HELIOVIEWER</p>
-                        <h3 id="solar-motion-title">The Sun in motion</h3>
+            <div class="timeline-player" id="timeline-player" aria-busy="true">
+                <canvas id="timeline-canvas" aria-label="Animated NASA space weather timeline"></canvas>
+                <div class="timeline-hud">
+                    <div class="timeline-readout">
+                        <time id="timeline-date">Loading timeline</time>
+                        <strong id="timeline-badge">NASA DONKI</strong>
+                        <span id="timeline-detail">Fetching events…</span>
                     </div>
-                    <button class="refresh-button" id="animation-toggle" type="button" disabled>
-                        Play animation
-                    </button>
+                    <div class="timeline-legend" aria-label="Event types">
+                        <span><i class="timeline-dot flr"></i>Solar flare</span>
+                        <span><i class="timeline-dot hss"></i>High-speed stream</span>
+                        <span><i class="timeline-dot gst"></i>Geomagnetic storm</span>
+                    </div>
                 </div>
-                <p class="section-status" id="animation-status" role="status" aria-live="polite">
-                    Waiting for a recent NASA alert…
-                </p>
-                <div class="solar-animation">
-                    <img id="solar-frame" alt="" hidden>
+                <div class="timeline-controls">
+                    <button class="refresh-button" id="timeline-play" type="button">Pause</button>
+                    <button class="refresh-button" id="timeline-restart" type="button">Restart</button>
+                    <label class="timeline-scrubber">
+                        <span id="timeline-range-label">Loading 365-day timeline…</span>
+                        <input id="timeline-scrubber" type="range" min="0" max="100" value="0">
+                    </label>
+                    <select class="timeline-speed" id="timeline-speed" aria-label="Playback speed">
+                        <option value="550">0.5x</option>
+                        <option value="280" selected>1x</option>
+                        <option value="120">2x</option>
+                        <option value="50">5x</option>
+                    </select>
                 </div>
-                <time class="animation-frame-time" id="animation-frame-time" aria-live="off">
-                    Waiting for solar images…
-                </time>
-                <p class="animation-caption" id="animation-caption">
-                    One image per hour across the 24 hours ending at the latest NASA alert.
-                </p>
-                <a class="event-link" id="latest-alert-link" target="_blank" rel="noopener noreferrer" hidden>
-                    View the NASA alert
-                </a>
             </div>
         </section>
 
