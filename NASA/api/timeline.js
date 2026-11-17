@@ -56,9 +56,13 @@ module.exports = async function handler(request, response) {
         return response.status(200).json(timelineCache.payload);
     }
     const endpoints = [
-        { type: "FLR", timeKey: "beginTime" },
-        { type: "HSS", timeKey: "eventTime" },
-        { type: "GST", timeKey: "startTime" }
+        {
+            type: "FLR",
+            timeKey: "beginTime",
+            url: "https://ccmc.gsfc.nasa.gov/DONKI-API/get/FLR"
+        },
+        { type: "HSS", timeKey: "eventTime", api: "NASA" },
+        { type: "GST", timeKey: "startTime", api: "NASA" }
     ];
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 55000);
@@ -77,12 +81,15 @@ module.exports = async function handler(request, response) {
                 while (nextTask < tasks.length) {
                     const task = tasks[nextTask];
                     nextTask += 1;
-                    const url = new URL(`https://api.nasa.gov/DONKI/${task.type}`);
-                    url.search = new URLSearchParams({
+                    const url = new URL(
+                        task.url || `https://api.nasa.gov/DONKI/${task.type}`
+                    );
+                    const params = new URLSearchParams({
                         startDate: task.startDate,
-                        endDate: task.endDate,
-                        api_key: apiKey
-                    }).toString();
+                        endDate: task.endDate
+                    });
+                    if (task.api === "NASA") params.set("api_key", apiKey);
+                    url.search = params.toString();
                     try {
                         const data = await fetchJson(url, controller.signal);
                         results.push({
