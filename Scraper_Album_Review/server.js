@@ -46,6 +46,14 @@ const sourceDefinitions = [
             { url: 'https://www.nocleansinging.com/category/reviews/album-reviews/', type: 'html' },
             { url: 'https://www.nocleansinging.com/category/reviews/album-reviews/feed/', type: 'rss' }
         ]
+    },
+    {
+        id: 'invisible-oranges',
+        name: 'Invisible Oranges',
+        host: 'invisibleoranges.com',
+        urls: [
+            { url: 'https://www.invisibleoranges.com/category/metal-features/', type: 'html' }
+        ]
     }
 ];
 
@@ -103,7 +111,21 @@ function parseHtml(source, html, pageUrl) {
     const $ = cheerio.load(html);
     const reviews = [];
 
-    if (source.id === 'metalreviews') {
+    if (source.id === 'invisible-oranges') {
+        $('h3.card-title a').each((_, element) => {
+            const anchor = $(element);
+            const card = anchor.closest('.card');
+            const imageElement = card.find('img').first();
+            const review = makeReview(
+                source,
+                anchor.text(),
+                imageFromElement($, imageElement),
+                anchor.attr('href'),
+                pageUrl
+            );
+            if (review) reviews.push(review);
+        });
+    } else if (source.id === 'metalreviews') {
         $('a[href*="/reviews/album/"]').each((_, element) => {
             const anchor = $(element);
             const imageElement = anchor.find('img').first();

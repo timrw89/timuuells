@@ -1,6 +1,6 @@
 # Squeal
 
-Squeal shows up to eight recent reviews from each of four metal review sites. Its responsive page is served by an Express app, which scrapes the sites on startup and when **Refresh reviews** is clicked.
+Squeal shows up to eight recent reviews and features from five metal publications. Its responsive page is served by an Express app, which scrapes the sites on startup and when **Refresh reviews** is clicked.
 
 ## Run locally
 
