@@ -59,7 +59,46 @@
             </div>
         </section>
 
-        <section class="dashboard-section timeline-section" aria-labelledby="activity-title">
+        <section class="dashboard-section timeline-section" id="swpc-timeline" aria-labelledby="swpc-timeline-title">
+            <div class="section-heading">
+                <div>
+                    <p class="section-index">NOAA SWPC / GOES PRIMARY / PAST 7 DAYS</p>
+                    <h2 id="swpc-timeline-title">GOES X-ray flare timeline</h2>
+                </div>
+            </div>
+            <p class="section-status">
+                C-class and stronger flare intervals are derived from the GOES 0.1–0.8 nm X-ray flux.
+            </p>
+            <div class="timeline-player" id="swpc-timeline-player" aria-busy="true">
+                <canvas id="swpc-timeline-canvas" aria-label="Animated NOAA GOES X-ray flare timeline"></canvas>
+                <div class="timeline-hud">
+                    <div class="timeline-readout">
+                        <time id="swpc-timeline-date">Loading timeline</time>
+                        <strong id="swpc-timeline-badge">GOES X-ray flare</strong>
+                        <span id="swpc-timeline-detail">Fetching NOAA SWPC measurements…</span>
+                    </div>
+                    <div class="timeline-legend" aria-label="Event types">
+                        <span><i class="timeline-dot flr"></i>GOES X-ray flare</span>
+                    </div>
+                </div>
+                <div class="timeline-controls">
+                    <button class="refresh-button timeline-control-play" id="swpc-timeline-play" type="button" disabled>Pause</button>
+                    <button class="refresh-button timeline-control-restart" id="swpc-timeline-restart" type="button" disabled>Restart</button>
+                    <label class="timeline-scrubber timeline-control-scrubber">
+                        <span id="swpc-timeline-range-label">Loading 7-day GOES timeline…</span>
+                        <input id="swpc-timeline-scrubber" type="range" min="0" max="100" value="0" disabled>
+                    </label>
+                    <select class="timeline-speed timeline-control-speed" id="swpc-timeline-speed" aria-label="GOES timeline playback speed" disabled>
+                        <option value="550">0.5x</option>
+                        <option value="280" selected>1x</option>
+                        <option value="120">2x</option>
+                        <option value="50">5x</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-section timeline-section" id="donki-timeline" aria-labelledby="activity-title">
             <div class="section-heading">
                 <div>
                     <p class="section-index">NASA DONKI / PAST 365 DAYS</p>
@@ -81,13 +120,13 @@
                     </div>
                 </div>
                 <div class="timeline-controls">
-                    <button class="refresh-button" id="timeline-play" type="button">Pause</button>
-                    <button class="refresh-button" id="timeline-restart" type="button">Restart</button>
-                    <label class="timeline-scrubber">
+                    <button class="refresh-button timeline-control-play" id="timeline-play" type="button">Pause</button>
+                    <button class="refresh-button timeline-control-restart" id="timeline-restart" type="button">Restart</button>
+                    <label class="timeline-scrubber timeline-control-scrubber">
                         <span id="timeline-range-label">Loading 365-day timeline…</span>
                         <input id="timeline-scrubber" type="range" min="0" max="100" value="0">
                     </label>
-                    <select class="timeline-speed" id="timeline-speed" aria-label="Playback speed">
+                    <select class="timeline-speed timeline-control-speed" id="timeline-speed" aria-label="Playback speed">
                         <option value="550">0.5x</option>
                         <option value="280" selected>1x</option>
                         <option value="120">2x</option>

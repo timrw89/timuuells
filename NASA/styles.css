@@ -424,6 +424,7 @@ p {
     left: 1rem;
     display: grid;
     grid-template-columns: auto auto minmax(8rem, 1fr) auto;
+    grid-template-areas: "play restart scrubber speed";
     align-items: center;
     gap: .65rem;
     padding: .7rem;
@@ -431,6 +432,11 @@ p {
     border-radius: .35rem;
     background: rgb(12 17 30 / 92%);
 }
+
+.timeline-control-play { grid-area: play; }
+.timeline-control-restart { grid-area: restart; }
+.timeline-control-scrubber { grid-area: scrubber; min-width: 0; }
+.timeline-control-speed { grid-area: speed; }
 
 .timeline-scrubber {
     display: grid;
@@ -450,6 +456,27 @@ p {
     border-radius: .25rem;
     background: #101827;
     color: var(--color-ink);
+}
+
+@media (max-width: 600px) {
+    .timeline-hud {
+        flex-direction: column;
+    }
+
+    .timeline-legend {
+        justify-content: flex-start;
+    }
+
+    .timeline-controls {
+        grid-template-columns: auto auto minmax(0, 1fr);
+        grid-template-areas:
+            "play restart speed"
+            "scrubber scrubber scrubber";
+    }
+
+    .timeline-control-speed {
+        justify-self: end;
+    }
 }
 
 .data-note,

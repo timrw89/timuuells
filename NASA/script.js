@@ -598,151 +598,221 @@ drawSatelliteScene();
 refreshEpic();
 refreshSatellites();
 
-const timelineCanvas = document.querySelector("#timeline-canvas");
-const timelinePlayer = document.querySelector("#timeline-player");
-const timelineDate = document.querySelector("#timeline-date");
-const timelineBadge = document.querySelector("#timeline-badge");
-const timelineDetail = document.querySelector("#timeline-detail");
-const timelinePlay = document.querySelector("#timeline-play");
-const timelineRestart = document.querySelector("#timeline-restart");
-const timelineScrubber = document.querySelector("#timeline-scrubber");
-const timelineRangeLabel = document.querySelector("#timeline-range-label");
-const timelineSpeed = document.querySelector("#timeline-speed");
+function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describe }) {
+    const element = (suffix) => document.querySelector(`#${prefix}-${suffix}`);
+    const player = element("player");
+    const canvas = element("canvas");
+    const dateReadout = element("date");
+    const badge = element("badge");
+    const detail = element("detail");
+    const playButton = element("play");
+    const restartButton = element("restart");
+    const scrubber = element("scrubber");
+    const rangeLabel = element("range-label");
+    const speedSelect = element("speed");
 
-const timelineColors = { FLR: "#ff9f1c", HSS: "#00f5d4", GST: "#f72585" };
-const timelineLabels = { FLR: "Solar flare", HSS: "High-speed stream", GST: "Geomagnetic storm" };
-let timelineEvents = [];
-let timelineIndex = 0;
-let timelinePlaying = true;
-let timelineStepMs = 280;
-let timelineLastStep = 0;
-let timelinePulses = [];
-let timelineStars = [];
-let timelineMin = 0;
-let timelineMax = 1;
+    let events = [];
+    let playing = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let stepInterval = 280;
+    let lastStepTime = 0;
+    let playbackIndex = 0;
+    let selectedIndex = -1;
+    let minTimestamp = 0;
+    let maxTimestamp = 1;
+    let stars = [];
+    const played = new Set();
+    const pulses = [];
+    playButton.textContent = playing ? "Pause" : "Play";
 
-function resizeTimeline() {
-    if (!timelineCanvas) return;
-    const bounds = timelineCanvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    timelineCanvas.width = Math.round(bounds.width * dpr);
-    timelineCanvas.height = Math.round(bounds.height * dpr);
-    const context = timelineCanvas.getContext("2d");
-    context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    timelineStars = Array.from({ length: 120 }, () => ({
-        x: Math.random() * bounds.width,
-        y: Math.random() * bounds.height,
-        r: Math.random() * 1.2 + .25,
-        alpha: Math.random() * .5 + .15
-    }));
-}
-
-function triggerTimelineEvent(index) {
-    if (!timelineEvents[index]) return;
-    const event = timelineEvents[index];
-    timelineDate.textContent = `${event.date} ${event.time} UTC`;
-    timelineBadge.textContent = timelineLabels[event.type] || event.type;
-    timelineBadge.style.color = timelineColors[event.type];
-    timelineDetail.textContent = event.detail;
-    timelineScrubber.value = String(index);
-
-    const width = timelineCanvas.getBoundingClientRect().width;
-    const progress = (event.timestamp - timelineMin) / (timelineMax - timelineMin || 1);
-    const x = 60 + progress * Math.max(1, width - 120);
-    const centerY = 260;
-    const laneY = centerY + (event.type === "FLR" ? -70 : event.type === "GST" ? 70 : 0);
-    timelinePulses.push({
-        x,
-        y: laneY,
-        color: timelineColors[event.type] || "#38bdf8",
-        radius: 4,
-        maxRadius: 18 + event.intensity * 5,
-        alpha: 1
-    });
-}
-
-function drawTimeline(now) {
-    if (!timelineCanvas) return;
-    window.requestAnimationFrame(drawTimeline);
-    const bounds = timelineCanvas.getBoundingClientRect();
-    if (bounds.width === 0 || bounds.height === 0) return;
-    const context = timelineCanvas.getContext("2d");
-
-    if (timelinePlaying && timelineEvents.length > 0 && now - timelineLastStep >= timelineStepMs) {
-        triggerTimelineEvent(timelineIndex);
-        timelineIndex = (timelineIndex + 1) % timelineEvents.length;
-        timelineLastStep = now;
+    function resize() {
+        const bounds = canvas.getBoundingClientRect();
+        const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(bounds.width * pixelRatio);
+        canvas.height = Math.round(bounds.height * pixelRatio);
+        canvas.getContext("2d").setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        stars = Array.from({ length: 120 }, () => ({
+            x: Math.random() * bounds.width,
+            y: Math.random() * bounds.height,
+            radius: Math.random() * 1.2 + .25,
+            alpha: Math.random() * .5 + .15
+        }));
     }
 
-    context.fillStyle = "rgba(5, 7, 14, .24)";
-    context.fillRect(0, 0, bounds.width, bounds.height);
-    timelineStars.forEach((star) => {
-        context.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
-        context.beginPath();
-        context.arc(star.x, star.y, star.r, 0, Math.PI * 2);
-        context.fill();
-    });
-
-    const centerY = 260;
-    const usableWidth = Math.max(1, bounds.width - 120);
-    ["FLR", "HSS", "GST"].forEach((type) => {
-        const laneY = centerY + (type === "FLR" ? -70 : type === "GST" ? 70 : 0);
-        context.strokeStyle = "rgba(255, 255, 255, .08)";
-        context.beginPath();
-        context.moveTo(60, laneY);
-        context.lineTo(bounds.width - 60, laneY);
-        context.stroke();
-    });
-
-    timelineEvents.forEach((event, index) => {
-        if (index > timelineIndex) return;
-        const progress = (event.timestamp - timelineMin) / (timelineMax - timelineMin || 1);
-        const x = 60 + progress * usableWidth;
-        const laneY = centerY + (event.type === "FLR" ? -70 : event.type === "GST" ? 70 : 0);
-        context.fillStyle = timelineColors[event.type] || "#38bdf8";
-        context.globalAlpha = index === timelineIndex - 1 ? 1 : .35;
-        context.beginPath();
-        context.arc(x, laneY, index === timelineIndex - 1 ? 5 : 2.5, 0, Math.PI * 2);
-        context.fill();
-    });
-    context.globalAlpha = 1;
-
-    for (let index = timelinePulses.length - 1; index >= 0; index -= 1) {
-        const pulse = timelinePulses[index];
-        pulse.radius += (pulse.maxRadius - pulse.radius) * .08;
-        pulse.alpha -= .018;
-        if (pulse.alpha <= 0) {
-            timelinePulses.splice(index, 1);
-            continue;
-        }
-        context.strokeStyle = pulse.color;
-        context.globalAlpha = pulse.alpha;
-        context.lineWidth = 2;
-        context.beginPath();
-        context.arc(pulse.x, pulse.y, pulse.radius, 0, Math.PI * 2);
-        context.stroke();
+    function eventY(type, height) {
+        const lane = Math.max(0, types.indexOf(type));
+        return height * .52 + (lane - (types.length - 1) / 2) * 70;
     }
-    context.globalAlpha = 1;
-}
 
-async function loadTimeline() {
-    try {
-        const response = await fetch("/api/timeline", {
-            headers: { Accept: "application/json" },
-            cache: "no-store"
+    function showEvent(index) {
+        const event = events[index];
+        if (!event) return;
+        selectedIndex = index;
+        playbackIndex = (index + 1) % events.length;
+        played.add(index);
+        dateReadout.textContent = `${event.date} ${event.time} UTC`;
+        badge.textContent = labels[event.type] || event.type;
+        badge.style.color = colors[event.type] || "#38bdf8";
+        detail.textContent = event.detail;
+        scrubber.value = String(index);
+
+        const bounds = canvas.getBoundingClientRect();
+        const margin = Math.min(60, bounds.width * .08);
+        const fraction = (event.timestamp - minTimestamp) / (maxTimestamp - minTimestamp || 1);
+        pulses.push({
+            x: margin + fraction * Math.max(1, bounds.width - margin * 2),
+            y: eventY(event.type, bounds.height),
+            color: colors[event.type] || "#38bdf8",
+            radius: 4,
+            maxRadius: 18 + (event.intensity || 1) * 5,
+            alpha: 1
         });
-        const data = await readResponse(response);
-        timelineEvents = Array.isArray(data.events) ? data.events : [];
-        if (timelineEvents.length === 0) {
-            timelineRangeLabel.textContent = "No space-weather events were returned.";
-            timelinePlayer.setAttribute("aria-busy", "false");
-            return;
+    }
+
+    function render(now) {
+        window.requestAnimationFrame(render);
+        const bounds = canvas.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) return;
+        const context = canvas.getContext("2d");
+
+        if (playing && events.length && now - lastStepTime >= stepInterval) {
+            showEvent(playbackIndex);
+            lastStepTime = now;
         }
-        timelineMin = timelineEvents[0].timestamp;
-        timelineMax = timelineEvents[timelineEvents.length - 1].timestamp;
-        timelineScrubber.max = String(timelineEvents.length - 1);
+
+        context.fillStyle = "rgba(5, 7, 14, .24)";
+        context.fillRect(0, 0, bounds.width, bounds.height);
+        stars.forEach((star) => {
+            context.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+            context.beginPath();
+            context.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+            context.fill();
+        });
+
+        const margin = Math.min(60, bounds.width * .08);
+        types.forEach((type) => {
+            const y = eventY(type, bounds.height);
+            context.strokeStyle = "rgba(255, 255, 255, .08)";
+            context.beginPath();
+            context.moveTo(margin, y);
+            context.lineTo(bounds.width - margin, y);
+            context.stroke();
+        });
+
+        events.forEach((event, index) => {
+            if (!played.has(index)) return;
+            const fraction = (event.timestamp - minTimestamp) / (maxTimestamp - minTimestamp || 1);
+            const x = margin + fraction * Math.max(1, bounds.width - margin * 2);
+            context.fillStyle = colors[event.type] || "#38bdf8";
+            context.globalAlpha = index === selectedIndex ? 1 : .35;
+            context.beginPath();
+            context.arc(x, eventY(event.type, bounds.height), index === selectedIndex ? 5 : 2.5, 0, Math.PI * 2);
+            context.fill();
+        });
+        context.globalAlpha = 1;
+
+        for (let index = pulses.length - 1; index >= 0; index -= 1) {
+            const pulse = pulses[index];
+            pulse.radius += (pulse.maxRadius - pulse.radius) * .08;
+            pulse.alpha -= .018;
+            if (pulse.alpha <= 0) {
+                pulses.splice(index, 1);
+                continue;
+            }
+            context.strokeStyle = pulse.color;
+            context.globalAlpha = pulse.alpha;
+            context.lineWidth = 2;
+            context.beginPath();
+            context.arc(pulse.x, pulse.y, pulse.radius, 0, Math.PI * 2);
+            context.stroke();
+        }
+        context.globalAlpha = 1;
+    }
+
+    async function load() {
+        try {
+            const response = await fetch(endpoint, {
+                headers: { Accept: "application/json" },
+                cache: "no-store"
+            });
+            const data = await readResponse(response);
+            events = Array.isArray(data.events)
+                ? data.events.slice().sort((left, right) => left.timestamp - right.timestamp)
+                : [];
+            if (events.length === 0) {
+                rangeLabel.textContent = data.emptyMessage || "No timeline events were returned.";
+                player.setAttribute("aria-busy", "false");
+                playButton.disabled = true;
+                restartButton.disabled = true;
+                scrubber.disabled = true;
+                speedSelect.disabled = true;
+                return;
+            }
+
+            minTimestamp = events[0].timestamp;
+            maxTimestamp = events[events.length - 1].timestamp;
+            scrubber.max = String(events.length - 1);
+            rangeLabel.textContent = describe(data, events);
+            player.setAttribute("aria-busy", "false");
+            playButton.disabled = false;
+            restartButton.disabled = false;
+            scrubber.disabled = false;
+            speedSelect.disabled = false;
+            resize();
+            showEvent(0);
+            window.requestAnimationFrame(render);
+        } catch (error) {
+            console.error(`Unable to load timeline from ${endpoint}.`, error);
+            rangeLabel.textContent = error.message;
+            player.setAttribute("aria-busy", "false");
+            playButton.disabled = true;
+            restartButton.disabled = true;
+            scrubber.disabled = true;
+            speedSelect.disabled = true;
+        }
+    }
+
+    playButton.addEventListener("click", () => {
+        playing = !playing;
+        playButton.textContent = playing ? "Pause" : "Play";
+    });
+    restartButton.addEventListener("click", () => {
+        played.clear();
+        pulses.length = 0;
+        playbackIndex = 0;
+        showEvent(0);
+    });
+    scrubber.addEventListener("input", () => {
+        playing = false;
+        playButton.textContent = "Play";
+        showEvent(Number(scrubber.value));
+    });
+    speedSelect.addEventListener("change", () => {
+        stepInterval = Number(speedSelect.value);
+    });
+    window.addEventListener("resize", resize);
+    resize();
+    load();
+}
+
+createTimelinePlayer({
+    prefix: "swpc-timeline",
+    endpoint: "/api/noaa-flares",
+    colors: { FLR: "#ff9f1c" },
+    labels: { FLR: "GOES X-ray flare" },
+    types: ["FLR"],
+    describe: (data) =>
+        `${data.startDate} to ${data.endDate} · ${data.eventCount} C-class or stronger flares · ${formatNumber(data.sampleCount)} X-ray samples`
+});
+
+createTimelinePlayer({
+    prefix: "timeline",
+    endpoint: "/api/timeline",
+    colors: { FLR: "#ff9f1c", HSS: "#00f5d4", GST: "#f72585" },
+    labels: { FLR: "Solar flare", HSS: "High-speed stream", GST: "Geomagnetic storm" },
+    types: ["FLR", "HSS", "GST"],
+    describe: (data) => {
         const counts = data.counts || {};
-        timelineRangeLabel.textContent =
+        let label =
             `${data.startDate} to ${data.endDate} · ` +
             `${counts.FLR || 0} FLR · ${counts.HSS || 0} HSS · ${counts.GST || 0} GST`;
         if (Array.isArray(data.warnings) && data.warnings.length > 0) {
@@ -753,35 +823,8 @@ async function loadTimeline() {
                 }))
                 .filter((entry) => entry.failed > 0)
                 .map((entry) => `${entry.failed} ${entry.type} chunk${entry.failed === 1 ? "" : "s"} unavailable`);
-            timelineRangeLabel.textContent += ` · ${failedTypes.join(", ")}`;
+            label += ` · ${failedTypes.join(", ")}`;
         }
-        timelinePlayer.setAttribute("aria-busy", "false");
-        resizeTimeline();
-        triggerTimelineEvent(0);
-        window.requestAnimationFrame(drawTimeline);
-    } catch (error) {
-        console.error("Unable to load NASA timeline.", error);
-        timelineRangeLabel.textContent = error.message;
-        timelinePlayer.setAttribute("aria-busy", "false");
+        return label;
     }
-}
-
-timelinePlay.addEventListener("click", () => {
-    timelinePlaying = !timelinePlaying;
-    timelinePlay.textContent = timelinePlaying ? "Pause" : "Play";
 });
-timelineRestart.addEventListener("click", () => {
-    timelineIndex = 0;
-    timelinePulses = [];
-    triggerTimelineEvent(0);
-});
-timelineScrubber.addEventListener("input", (event) => {
-    timelineIndex = Math.max(0, Math.min(timelineEvents.length - 1, Number(event.target.value)));
-    triggerTimelineEvent(timelineIndex);
-});
-timelineSpeed.addEventListener("change", (event) => {
-    timelineStepMs = Number(event.target.value);
-});
-window.addEventListener("resize", resizeTimeline);
-resizeTimeline();
-loadTimeline();
