@@ -741,13 +741,19 @@ async function loadTimeline() {
         timelineMin = timelineEvents[0].timestamp;
         timelineMax = timelineEvents[timelineEvents.length - 1].timestamp;
         timelineScrubber.max = String(timelineEvents.length - 1);
+        const counts = data.counts || {};
         timelineRangeLabel.textContent =
-            `${data.startDate} to ${data.endDate} · ${timelineEvents.length} events`;
+            `${data.startDate} to ${data.endDate} · ` +
+            `${counts.FLR || 0} FLR · ${counts.HSS || 0} HSS · ${counts.GST || 0} GST`;
         if (Array.isArray(data.warnings) && data.warnings.length > 0) {
-            const flareWarning = data.warnings.some((warning) => warning.startsWith("FLR "));
-            if (flareWarning) {
-                timelineRangeLabel.textContent += " · Some FLR data unavailable";
-            }
+            const failedTypes = ["FLR", "HSS", "GST"]
+                .map((type) => ({
+                    type,
+                    failed: data.warnings.filter((warning) => warning.startsWith(`${type} `)).length
+                }))
+                .filter((entry) => entry.failed > 0)
+                .map((entry) => `${entry.failed} ${entry.type} chunk${entry.failed === 1 ? "" : "s"} unavailable`);
+            timelineRangeLabel.textContent += ` · ${failedTypes.join(", ")}`;
         }
         timelinePlayer.setAttribute("aria-busy", "false");
         resizeTimeline();

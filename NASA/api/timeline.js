@@ -62,28 +62,43 @@ module.exports = async function handler(request, response) {
     ];
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 55000);
-    response.setHeader("Cache-Control", "s-maxage=21600, stale-while-revalidate=43200");
 
     try {
         const chunks = dateChunks(startDate, endDate);
         const results = [];
         const failures = [];
-        for (const { type, timeKey } of endpoints) {
-            for (const chunk of chunks) {
-                const url = new URL(`https://api.nasa.gov/DONKI/${type}`);
-                url.search = new URLSearchParams({
-                    startDate: chunk.startDate,
-                    endDate: chunk.endDate,
-                    api_key: apiKey
-                }).toString();
-                try {
-                    const data = await fetchJson(url, controller.signal);
-                    results.push({ type, timeKey, data: Array.isArray(data) ? data : [] });
-                } catch (error) {
-                    failures.push(`${type} ${chunk.startDate}-${chunk.endDate}: ${error.message}`);
+        const tasks = endpoints.flatMap((endpoint) =>
+            chunks.map((chunk) => ({ ...endpoint, ...chunk }))
+        );
+        let nextTask = 0;
+        const workers = Array.from(
+            { length: Math.min(5, tasks.length) },
+            async () => {
+                while (nextTask < tasks.length) {
+                    const task = tasks[nextTask];
+                    nextTask += 1;
+                    const url = new URL(`https://api.nasa.gov/DONKI/${task.type}`);
+                    url.search = new URLSearchParams({
+                        startDate: task.startDate,
+                        endDate: task.endDate,
+                        api_key: apiKey
+                    }).toString();
+                    try {
+                        const data = await fetchJson(url, controller.signal);
+                        results.push({
+                            type: task.type,
+                            timeKey: task.timeKey,
+                            data: Array.isArray(data) ? data : []
+                        });
+                    } catch (error) {
+                        failures.push(
+                            `${task.type} ${task.startDate}-${task.endDate}: ${error.message}`
+                        );
+                    }
                 }
             }
-        }
+        );
+        await Promise.all(workers);
 
         if (results.length === 0) {
             throw new Error(failures.join(" | ") || "NASA DONKI returned no timeline data.");
@@ -125,19 +140,31 @@ module.exports = async function handler(request, response) {
         });
 
         events.sort((left, right) => left.timestamp - right.timestamp);
+        const counts = {
+            FLR: events.filter((event) => event.type === "FLR").length,
+            HSS: events.filter((event) => event.type === "HSS").length,
+            GST: events.filter((event) => event.type === "GST").length
+        };
         const payload = {
             startDate,
             endDate,
             generatedAt: new Date().toISOString(),
             warnings: failures,
+            counts,
             events
         };
-        timelineCache = {
-            startDate,
-            endDate,
-            savedAt: Date.now(),
-            payload
-        };
+        if (failures.length === 0) {
+            response.setHeader("Cache-Control", "s-maxage=21600, stale-while-revalidate=43200");
+            timelineCache = {
+                startDate,
+                endDate,
+                savedAt: Date.now(),
+                payload
+            };
+        } else {
+            response.setHeader("Cache-Control", "no-store");
+            timelineCache = null;
+        }
         return response.status(200).json(payload);
     } catch (error) {
         console.error("NASA 365-day timeline request failed.", error);
