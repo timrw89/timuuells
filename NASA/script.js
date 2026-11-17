@@ -624,6 +624,10 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
     const pulses = [];
     playButton.textContent = playing ? "Pause" : "Play";
 
+    function eventColor(event) {
+        return colors[`${event.type}:${event.flareBand}`] || colors[event.type] || "#38bdf8";
+    }
+
     function resize() {
         const bounds = canvas.getBoundingClientRect();
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
@@ -650,8 +654,10 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
         playbackIndex = (index + 1) % events.length;
         played.add(index);
         dateReadout.textContent = `${event.date} ${event.time} UTC`;
-        badge.textContent = labels[event.type] || event.type;
-        badge.style.color = colors[event.type] || "#38bdf8";
+        badge.textContent = event.flareClass
+            ? `${event.flareClass} flare`
+            : labels[event.type] || event.type;
+        badge.style.color = eventColor(event);
         detail.textContent = event.detail;
         scrubber.value = String(index);
 
@@ -661,7 +667,7 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
         pulses.push({
             x: margin + fraction * Math.max(1, bounds.width - margin * 2),
             y: eventY(event.type, bounds.height),
-            color: colors[event.type] || "#38bdf8",
+            color: eventColor(event),
             radius: 4,
             maxRadius: 18 + (event.intensity || 1) * 5,
             alpha: 1
@@ -702,12 +708,19 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
             if (!played.has(index)) return;
             const fraction = (event.timestamp - minTimestamp) / (maxTimestamp - minTimestamp || 1);
             const x = margin + fraction * Math.max(1, bounds.width - margin * 2);
-            context.fillStyle = colors[event.type] || "#38bdf8";
+            context.fillStyle = eventColor(event);
             context.globalAlpha = index === selectedIndex ? 1 : .35;
             context.beginPath();
-            context.arc(x, eventY(event.type, bounds.height), index === selectedIndex ? 5 : 2.5, 0, Math.PI * 2);
+            const baseRadius = event.markerRadius || 2.5;
+            const markerRadius = event.markerRadius
+                ? baseRadius + (index === selectedIndex ? 2 : 0)
+                : index === selectedIndex ? 5 : baseRadius;
+            context.shadowColor = eventColor(event);
+            context.shadowBlur = index === selectedIndex ? markerRadius * 1.5 : 0;
+            context.arc(x, eventY(event.type, bounds.height), markerRadius, 0, Math.PI * 2);
             context.fill();
         });
+        context.shadowBlur = 0;
         context.globalAlpha = 1;
 
         for (let index = pulses.length - 1; index >= 0; index -= 1) {
@@ -797,7 +810,12 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
 createTimelinePlayer({
     prefix: "swpc-timeline",
     endpoint: "/api/noaa-flares",
-    colors: { FLR: "#ff9f1c" },
+    colors: {
+        FLR: "#7ce8ff",
+        "FLR:C": "#7ce8ff",
+        "FLR:M": "#ffb347",
+        "FLR:X": "#ff4d8d"
+    },
     labels: { FLR: "GOES X-ray flare" },
     types: ["FLR"],
     describe: (data) =>

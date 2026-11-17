@@ -56,6 +56,12 @@ function extractFlares(rows) {
             date: date.toISOString().slice(0, 10),
             time: date.toISOString().slice(11, 16),
             type: "FLR",
+            flareClass: flareType,
+            flareBand: flareType[0],
+            markerRadius: Math.min(
+                12,
+                4 + Math.max(0, Math.log10(activeFlare.peak.flux / FLARE_THRESHOLD)) * 2.2
+            ),
             intensity: Math.min(18, classScale * Math.sqrt(classValue)),
             detail: `${flareType} flare peak · ${activeFlare.peak.flux.toExponential(2)} W/m²`
         });

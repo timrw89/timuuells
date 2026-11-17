@@ -416,6 +416,18 @@ p {
 .timeline-dot.flr { background: #ff9f1c; }
 .timeline-dot.hss { background: #00f5d4; }
 .timeline-dot.gst { background: #f72585; }
+.timeline-dot.flare-class-c { background: #7ce8ff; }
+.timeline-dot.flare-class-m {
+    width: .75rem;
+    height: .75rem;
+    background: #ffb347;
+}
+.timeline-dot.flare-class-x {
+    width: 1rem;
+    height: 1rem;
+    background: #ff4d8d;
+    box-shadow: 0 0 .45rem rgb(255 77 141 / 65%);
+}
 
 .timeline-controls {
     position: absolute;
