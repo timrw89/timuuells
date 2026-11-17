@@ -743,6 +743,12 @@ async function loadTimeline() {
         timelineScrubber.max = String(timelineEvents.length - 1);
         timelineRangeLabel.textContent =
             `${data.startDate} to ${data.endDate} · ${timelineEvents.length} events`;
+        if (Array.isArray(data.warnings) && data.warnings.length > 0) {
+            const flareWarning = data.warnings.some((warning) => warning.startsWith("FLR "));
+            if (flareWarning) {
+                timelineRangeLabel.textContent += " · Some FLR data unavailable";
+            }
+        }
         timelinePlayer.setAttribute("aria-busy", "false");
         resizeTimeline();
         triggerTimelineEvent(0);

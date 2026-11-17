@@ -5,7 +5,7 @@ An Earth and space-weather dashboard for NASA EPIC imagery, recent NASA event re
 ## Deploy with Vercel
 
 1. Import the repository as a Vercel project and set **Root Directory** to `NASA`.
-2. In **Project Settings → Environment Variables**, add `nasa_api_key` with your NASA API key. Keep it out of HTML, browser JavaScript, and committed files.
+2. In **Project Settings → Environment Variables**, add `nasa_api_key` or `NASA_API_KEY` with your NASA API key. Keep it out of HTML, browser JavaScript, and committed files.
 3. Deploy. The page calls same-origin serverless endpoints for NASA EPIC imagery, NASA DONKI notifications, solar imagery, and CelesTrak orbital elements.
 
 The Earth section fetches one natural-color EPIC image for each of the latest seven available days through `/api/epic`. The images play as an animated carousel and can be paused or stepped manually.

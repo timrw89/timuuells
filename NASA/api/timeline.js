@@ -32,25 +32,36 @@ function dateChunks(startDate, endDate, chunkDays = 30) {
     return chunks;
 }
 
+let timelineCache = null;
+
 module.exports = async function handler(request, response) {
     if (request.method !== "GET") {
         response.setHeader("Allow", "GET");
         return response.status(405).json({ error: "Method not allowed." });
     }
 
-    const apiKey = process.env.nasa_api_key || "DEMO_KEY";
+    const apiKey = process.env.nasa_api_key || process.env.NASA_API_KEY || "DEMO_KEY";
     const end = new Date();
     const start = new Date(end);
     start.setUTCFullYear(start.getUTCFullYear() - 1);
     const startDate = start.toISOString().slice(0, 10);
     const endDate = end.toISOString().slice(0, 10);
+    if (
+        timelineCache &&
+        timelineCache.startDate === startDate &&
+        timelineCache.endDate === endDate &&
+        Date.now() - timelineCache.savedAt < 6 * 60 * 60 * 1000
+    ) {
+        response.setHeader("Cache-Control", "s-maxage=21600, stale-while-revalidate=43200");
+        return response.status(200).json(timelineCache.payload);
+    }
     const endpoints = [
         { type: "FLR", timeKey: "beginTime" },
         { type: "HSS", timeKey: "eventTime" },
         { type: "GST", timeKey: "startTime" }
     ];
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20000);
+    const timeout = setTimeout(() => controller.abort(), 55000);
     response.setHeader("Cache-Control", "s-maxage=21600, stale-while-revalidate=43200");
 
     try {
@@ -114,13 +125,20 @@ module.exports = async function handler(request, response) {
         });
 
         events.sort((left, right) => left.timestamp - right.timestamp);
-        return response.status(200).json({
+        const payload = {
             startDate,
             endDate,
             generatedAt: new Date().toISOString(),
             warnings: failures,
             events
-        });
+        };
+        timelineCache = {
+            startDate,
+            endDate,
+            savedAt: Date.now(),
+            payload
+        };
+        return response.status(200).json(payload);
     } catch (error) {
         console.error("NASA 365-day timeline request failed.", error);
         return response.status(502).json({
