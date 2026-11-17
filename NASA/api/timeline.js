@@ -5,9 +5,31 @@ async function fetchJson(url, signal) {
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok) {
-        throw new Error(`NASA DONKI returned HTTP ${response.status}.`);
+        const detail = payload?.error?.message || payload?.error;
+        throw new Error(
+            `NASA DONKI returned HTTP ${response.status}${detail ? `: ${detail}` : "."}`
+        );
     }
     return payload;
+}
+
+function dateChunks(startDate, endDate, chunkDays = 30) {
+    const chunks = [];
+    let chunkStart = new Date(`${startDate}T00:00:00Z`);
+    const finalDate = new Date(`${endDate}T00:00:00Z`);
+
+    while (chunkStart <= finalDate) {
+        const chunkEnd = new Date(chunkStart);
+        chunkEnd.setUTCDate(chunkEnd.getUTCDate() + chunkDays - 1);
+        if (chunkEnd > finalDate) chunkEnd.setTime(finalDate.getTime());
+        chunks.push({
+            startDate: chunkStart.toISOString().slice(0, 10),
+            endDate: chunkEnd.toISOString().slice(0, 10)
+        });
+        chunkStart = new Date(chunkEnd);
+        chunkStart.setUTCDate(chunkStart.getUTCDate() + 1);
+    }
+    return chunks;
 }
 
 module.exports = async function handler(request, response) {
@@ -32,15 +54,20 @@ module.exports = async function handler(request, response) {
     response.setHeader("Cache-Control", "s-maxage=21600, stale-while-revalidate=43200");
 
     try {
-        const results = await Promise.all(endpoints.map(async ({ type, timeKey }) => {
-            const url = new URL(`https://api.nasa.gov/DONKI/${type}`);
-            url.search = new URLSearchParams({
-                startDate,
-                endDate,
-                api_key: apiKey
-            }).toString();
-            return { type, timeKey, data: await fetchJson(url, controller.signal) };
-        }));
+        const chunks = dateChunks(startDate, endDate);
+        const results = [];
+        for (const { type, timeKey } of endpoints) {
+            for (const chunk of chunks) {
+                const url = new URL(`https://api.nasa.gov/DONKI/${type}`);
+                url.search = new URLSearchParams({
+                    startDate: chunk.startDate,
+                    endDate: chunk.endDate,
+                    api_key: apiKey
+                }).toString();
+                const data = await fetchJson(url, controller.signal);
+                results.push({ type, timeKey, data: Array.isArray(data) ? data : [] });
+            }
+        }
 
         const events = [];
         results.forEach(({ type, timeKey, data }) => {

@@ -72,12 +72,6 @@ function formatTime(value, includeDate = false) {
     return new Intl.DateTimeFormat(undefined, options).format(date);
 }
 
-function setLoading(value) {
-    isLoading = value;
-    refreshButton.disabled = value;
-    metricGrid.setAttribute("aria-busy", String(value));
-}
-
 async function readResponse(response) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
@@ -574,34 +568,6 @@ async function refreshSatellites() {
     } finally {
         isLoadingSatellites = false;
         satelliteRefresh.disabled = false;
-    }
-}
-
-async function refreshDashboard() {
-    if (isLoading) {
-        return;
-    }
-
-    setLoading(true);
-    connectionStatus.textContent = "Updating NASA event data…";
-    liveIndicator.dataset.state = "loading";
-
-    try {
-        const response = await fetch("/api/space-weather", {
-            headers: { Accept: "application/json" },
-            cache: "no-store"
-        });
-        renderDashboard(await readResponse(response));
-    } catch (error) {
-        console.error("Unable to refresh NASA space-weather data.", error);
-        connectionStatus.textContent = "NASA event data is temporarily unavailable.";
-        liveIndicator.dataset.state = "error";
-        nasaNote.textContent = error.message;
-        nasaNote.classList.add("is-warning");
-        animationStatus.textContent = "NASA event data is unavailable.";
-        animationStatus.classList.add("is-warning");
-    } finally {
-        setLoading(false);
     }
 }
 
