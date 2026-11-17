@@ -56,6 +56,7 @@ module.exports = async function handler(request, response) {
     try {
         const chunks = dateChunks(startDate, endDate);
         const results = [];
+        const failures = [];
         for (const { type, timeKey } of endpoints) {
             for (const chunk of chunks) {
                 const url = new URL(`https://api.nasa.gov/DONKI/${type}`);
@@ -64,9 +65,17 @@ module.exports = async function handler(request, response) {
                     endDate: chunk.endDate,
                     api_key: apiKey
                 }).toString();
-                const data = await fetchJson(url, controller.signal);
-                results.push({ type, timeKey, data: Array.isArray(data) ? data : [] });
+                try {
+                    const data = await fetchJson(url, controller.signal);
+                    results.push({ type, timeKey, data: Array.isArray(data) ? data : [] });
+                } catch (error) {
+                    failures.push(`${type} ${chunk.startDate}-${chunk.endDate}: ${error.message}`);
+                }
             }
+        }
+
+        if (results.length === 0) {
+            throw new Error(failures.join(" | ") || "NASA DONKI returned no timeline data.");
         }
 
         const events = [];
@@ -109,6 +118,7 @@ module.exports = async function handler(request, response) {
             startDate,
             endDate,
             generatedAt: new Date().toISOString(),
+            warnings: failures,
             events
         });
     } catch (error) {
