@@ -282,6 +282,60 @@ p {
     line-height: 1.5;
 }
 
+.epic-player {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
+    align-items: center;
+    gap: .6rem;
+}
+
+.epic-frame {
+    margin: 0;
+}
+
+.epic-frame img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: contain;
+    border: 1px solid var(--color-line);
+    border-radius: .35rem;
+    background: #050810;
+}
+
+.epic-frame img[hidden] {
+    display: none;
+}
+
+.epic-frame figcaption {
+    margin-top: .65rem;
+    color: var(--color-muted);
+    font-size: .76rem;
+    line-height: 1.5;
+}
+
+.epic-step {
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid rgb(124 232 255 / 38%);
+    border-radius: 50%;
+    background: rgb(17 24 39 / 92%);
+    color: var(--color-cyan);
+    font: inherit;
+    cursor: pointer;
+}
+
+.epic-step:disabled {
+    cursor: default;
+    opacity: .45;
+}
+
+.epic-play {
+    grid-column: 2;
+    justify-self: center;
+    margin-top: .4rem;
+}
+
 .data-note,
 .section-status {
     margin: 1rem 0 0;
@@ -332,41 +386,6 @@ p {
     font-family: var(--font-display);
     font-size: 1.4rem;
     line-height: 1.25;
-}
-
-.notification-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-    gap: .8rem;
-    margin-top: 1.4rem;
-}
-
-.notification-card {
-    min-width: 0;
-    padding: 1rem;
-    border: 1px solid var(--color-line);
-    border-radius: .35rem;
-    background: rgb(17 24 39 / 72%);
-}
-
-.notification-card .event-type {
-    margin: 0;
-    color: var(--color-cyan);
-}
-
-.notification-card h3 {
-    margin: .65rem 0;
-    font-size: 1rem;
-    font-weight: 500;
-    line-height: 1.4;
-}
-
-.notification-card a {
-    display: inline-block;
-    margin-top: .7rem;
-    color: var(--color-cyan);
-    font-size: .72rem;
-    text-underline-offset: .2em;
 }
 
 .is-warning {

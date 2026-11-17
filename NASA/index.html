@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Track auroras and Earth's magnetic environment, explore NASA solar alerts, and view CelesTrak's last-30-days satellite group.">
+    <meta name="description" content="View NASA EPIC Earth images, explore NASA solar alerts, and view CelesTrak's last-30-days satellite group.">
     <meta name="theme-color" content="#090d16">
     <title>Space Weather — NASA DONKI</title>
     <link rel="stylesheet" href="./styles.css">
@@ -22,7 +22,7 @@
             <div class="hero-copy">
                 <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> EARTH, SUN &amp; SPACE WEATHER</p>
                 <h1 id="page-title">Space<br><em>weather.</em></h1>
-                <p class="hero-description">See how solar activity shapes auroras and Earth's magnetic environment, explore NASA event reports, and view satellites in CelesTrak's last-30-days group.</p>
+                <p class="hero-description">View daily Earth images from NASA EPIC, explore NASA solar event reports, and view satellites in CelesTrak's last-30-days group.</p>
                 <div class="live-status">
                     <span class="live-indicator" id="live-indicator" aria-hidden="true"></span>
                     <p id="connection-status" role="status" aria-live="polite">Connecting to NASA DONKI…</p>
@@ -35,56 +35,28 @@
             </aside>
         </section>
 
-        <section class="dashboard-section conditions-section" aria-labelledby="conditions-title">
+        <section class="dashboard-section epic-section" aria-labelledby="epic-title">
             <div class="section-heading">
                 <div>
-                    <p class="section-index">LIVE CONDITIONS / NOAA SWPC + NASA DONKI</p>
-                    <h2 id="conditions-title">Earth under the Sun</h2>
+                    <p class="section-index">NASA EPIC / LAST 7 DAYS</p>
+                    <h2 id="epic-title">Earth from space</h2>
                 </div>
-                <button class="refresh-button" id="conditions-refresh" type="button">
-                    Refresh conditions <span aria-hidden="true">↻</span>
+                <button class="refresh-button" id="epic-refresh" type="button">
+                    Refresh images <span aria-hidden="true">↻</span>
                 </button>
             </div>
-            <p class="section-status" id="conditions-status" role="status" aria-live="polite">
-                Loading aurora and magnetic-field data…
+            <p class="section-status" id="epic-status" role="status" aria-live="polite">
+                Loading the latest Earth images…
             </p>
-            <div class="conditions-layout">
-                <div class="aurora-visual">
-                    <canvas id="aurora-canvas" role="img" aria-labelledby="conditions-title aurora-caption">
-                        Earth with the forecast auroral regions plotted on the visible hemisphere.
-                    </canvas>
-                    <p class="satellite-caption" id="aurora-caption">
-                        NOAA OVATION aurora forecast on a textured Earth illustration. Aurora probabilities are a forecast, not a live photograph.
-                    </p>
-                </div>
-                <div class="conditions-metrics">
-                    <article class="metric-card">
-                        <p class="metric-label">Peak aurora probability</p>
-                        <p class="metric-reading"><span id="aurora-peak">—</span><span class="metric-unit">%</span></p>
-                        <p class="metric-note">NOAA OVATION forecast</p>
-                        <time class="condition-time" id="aurora-time">Waiting for forecast</time>
-                    </article>
-                    <article class="metric-card">
-                        <p class="metric-label">Interplanetary Bz</p>
-                        <p class="metric-reading"><span id="bz-value">—</span><span class="metric-unit">nT</span></p>
-                        <p class="metric-note">GSM north-south magnetic field</p>
-                        <time class="condition-time" id="magnetic-time">Waiting for measurement</time>
-                    </article>
-                    <article class="metric-card">
-                        <p class="metric-label">Total magnetic field</p>
-                        <p class="metric-reading"><span id="bt-value">—</span><span class="metric-unit">nT</span></p>
-                        <p class="metric-note">Solar-wind magnetic-field strength</p>
-                    </article>
-                    <article class="metric-card flare-summary-card">
-                        <p class="metric-label">Latest NASA flare</p>
-                        <p class="flare-summary" id="latest-flare-title">Waiting for NASA DONKI…</p>
-                        <time class="condition-time" id="latest-flare-time"></time>
-                    </article>
-                </div>
+            <div class="epic-player" id="epic-gallery" aria-live="polite">
+                <button class="epic-step" id="epic-prev" type="button" aria-label="Previous Earth image">←</button>
+                <figure class="epic-frame">
+                    <img id="epic-image" alt="Earth as seen by NASA's DSCOVR EPIC camera" hidden>
+                    <figcaption id="epic-caption">Fetching EPIC images…</figcaption>
+                </figure>
+                <button class="epic-step" id="epic-next" type="button" aria-label="Next Earth image">→</button>
+                <button class="refresh-button epic-play" id="epic-play" type="button" disabled>Pause animation</button>
             </div>
-            <p class="data-note" id="conditions-note">
-                Aurora and magnetic-field measurements from NOAA SWPC; solar-flare reports from NASA DONKI.
-            </p>
         </section>
 
         <section class="dashboard-section" aria-labelledby="activity-title">
@@ -121,10 +93,6 @@
                 </article>
             </div>
             <p class="data-note" id="nasa-note">Fetching recent event alerts from NASA DONKI…</p>
-
-            <div class="notification-list" id="nasa-notifications" aria-live="polite">
-                <p class="section-status">Loading recent NASA notifications…</p>
-            </div>
 
             <div class="solar-motion-panel" aria-labelledby="solar-motion-title">
                 <div class="section-heading subsection-heading">
@@ -197,7 +165,7 @@
     </main>
 
     <footer class="site-footer">
-        <p>NOAA SWPC live conditions · NASA DONKI alerts and imagery · Recent orbital elements from CelesTrak.</p>
+        <p>NASA EPIC Earth imagery · NASA DONKI alerts and imagery · Recent orbital elements from CelesTrak.</p>
         <span>The animation ends at the alert issue time, which may differ from the event time.</span>
     </footer>
 </body>

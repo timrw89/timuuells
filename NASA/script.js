@@ -5,23 +5,19 @@ const liveIndicator = document.querySelector("#live-indicator");
 const connectionStatus = document.querySelector("#connection-status");
 const lastUpdated = document.querySelector("#last-updated");
 const nasaNote = document.querySelector("#nasa-note");
-const nasaNotifications = document.querySelector("#nasa-notifications");
-const latestFlareTitle = document.querySelector("#latest-flare-title");
-const latestFlareTime = document.querySelector("#latest-flare-time");
 const animationStatus = document.querySelector("#animation-status");
 const animationCaption = document.querySelector("#animation-caption");
 const animationFrameTime = document.querySelector("#animation-frame-time");
 const latestAlertLink = document.querySelector("#latest-alert-link");
 const solarFrame = document.querySelector("#solar-frame");
-const conditionsCanvas = document.querySelector("#aurora-canvas");
-const conditionsStatus = document.querySelector("#conditions-status");
-const conditionsRefresh = document.querySelector("#conditions-refresh");
-const conditionsNote = document.querySelector("#conditions-note");
-const auroraPeak = document.querySelector("#aurora-peak");
-const auroraTime = document.querySelector("#aurora-time");
-const bzValue = document.querySelector("#bz-value");
-const btValue = document.querySelector("#bt-value");
-const magneticTime = document.querySelector("#magnetic-time");
+const epicRefresh = document.querySelector("#epic-refresh");
+const epicStatus = document.querySelector("#epic-status");
+const epicGallery = document.querySelector("#epic-gallery");
+const epicImage = document.querySelector("#epic-image");
+const epicCaption = document.querySelector("#epic-caption");
+const epicPrev = document.querySelector("#epic-prev");
+const epicNext = document.querySelector("#epic-next");
+const epicPlay = document.querySelector("#epic-play");
 const satelliteCanvas = document.querySelector("#satellite-canvas");
 const satelliteStatus = document.querySelector("#satellite-status");
 const satelliteCount = document.querySelector("#satellite-count");
@@ -30,7 +26,7 @@ const earthTexture = new Image();
 
 let isLoading = false;
 let isLoadingAnimation = false;
-let isLoadingConditions = false;
+let isLoadingEpic = false;
 let isLoadingSatellites = false;
 let animationAlertTime = "";
 let animationRequestId = 0;
@@ -38,7 +34,9 @@ let animationFrames = [];
 let animationFrameIndex = 0;
 let animationInterval = null;
 let satelliteElements = [];
-let auroraPoints = [];
+let epicImages = [];
+let epicIndex = 0;
+let epicInterval = null;
 
 const EARTH_RADIUS_KM = 6371;
 const EARTH_MU_KM3_PER_S2 = 398600.4418;
@@ -50,7 +48,6 @@ const ORBIT_COLORS = {
 
 earthTexture.addEventListener("load", () => {
     drawSatelliteScene();
-    drawAuroraScene();
 });
 earthTexture.src = "./earth.svg";
 
@@ -280,60 +277,7 @@ function renderDashboard(data) {
     nasaNote.textContent = `Showing NASA notifications from ${data.windowStart} through ${data.windowEnd}.`;
     nasaNote.classList.remove("is-warning");
 
-    renderNotifications(data.notifications);
-    if (data.latestFlare) {
-        latestFlareTitle.textContent = data.latestFlare.title || data.latestFlare.type;
-        latestFlareTime.dateTime = data.latestFlare.time;
-        latestFlareTime.textContent = formatTime(data.latestFlare.time, true);
-    } else {
-        latestFlareTitle.textContent = "No flare reports in the past seven days";
-        latestFlareTime.textContent = "";
-        latestFlareTime.removeAttribute("datetime");
-    }
-
     void loadSolarAnimation(data.latestAlert);
-}
-
-function renderNotifications(notifications) {
-    nasaNotifications.replaceChildren();
-
-    if (!Array.isArray(notifications) || notifications.length === 0) {
-        const emptyState = document.createElement("p");
-        emptyState.className = "section-status";
-        emptyState.textContent = "NASA DONKI has no recent notifications for this period.";
-        nasaNotifications.append(emptyState);
-        return;
-    }
-
-    notifications.forEach((notification) => {
-        const item = document.createElement("article");
-        item.className = "notification-card";
-
-        const type = document.createElement("p");
-        type.className = "event-type";
-        type.textContent = notification.type || "NASA notification";
-
-        const title = document.createElement("h3");
-        title.textContent = notification.title || notification.type || "NASA notification";
-
-        const time = document.createElement("time");
-        time.className = "condition-time";
-        if (notification.time) {
-            time.dateTime = notification.time;
-        }
-        time.textContent = formatTime(notification.time, true) || "Time unavailable";
-
-        item.append(type, title, time);
-        if (notification.url) {
-            const link = document.createElement("a");
-            link.href = notification.url;
-            link.target = "_blank";
-            link.rel = "noopener noreferrer";
-            link.textContent = "NASA details";
-            item.append(link);
-        }
-        nasaNotifications.append(item);
-    });
 }
 
 function drawEarth(context, centerX, centerY, radius) {
@@ -358,166 +302,6 @@ function drawEarth(context, centerX, centerY, radius) {
         );
     }
     context.restore();
-}
-
-function drawAuroraScene() {
-    if (!conditionsCanvas) {
-        return;
-    }
-
-    const bounds = conditionsCanvas.getBoundingClientRect();
-    if (bounds.width === 0 || bounds.height === 0) {
-        return;
-    }
-
-    const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
-    conditionsCanvas.width = Math.round(bounds.width * pixelRatio);
-    conditionsCanvas.height = Math.round(bounds.height * pixelRatio);
-    const context = conditionsCanvas.getContext("2d");
-    context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-
-    const width = bounds.width;
-    const height = bounds.height;
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const earthRadius = Math.min(width, height) * .32;
-
-    context.clearRect(0, 0, width, height);
-    for (let index = 0; index < 45; index += 1) {
-        const x = (index * 127.1 % 997) / 997 * width;
-        const y = (index * 311.7 % 991) / 991 * height;
-        context.fillStyle = "rgba(220, 242, 255, .28)";
-        context.fillRect(x, y, 1, 1);
-    }
-
-    context.save();
-    context.strokeStyle = "rgba(124, 232, 255, .18)";
-    context.lineWidth = 1;
-    [1.32, 1.62].forEach((scale, index) => {
-        context.beginPath();
-        context.ellipse(
-            centerX,
-            centerY,
-            earthRadius * scale,
-            earthRadius * scale * .48,
-            index === 0 ? -.24 : .22,
-            0,
-            Math.PI * 2
-        );
-        context.stroke();
-    });
-    context.restore();
-
-    drawEarth(context, centerX, centerY, earthRadius);
-    context.save();
-    context.beginPath();
-    context.arc(centerX, centerY, earthRadius, 0, Math.PI * 2);
-    context.clip();
-    auroraPoints.forEach(([longitude, latitude, probability]) => {
-        const longitudeRadians = longitude * Math.PI / 180;
-        const latitudeRadians = latitude * Math.PI / 180;
-        const depth = Math.cos(latitudeRadians) * Math.cos(longitudeRadians);
-        if (depth <= 0) {
-            return;
-        }
-
-        const x = centerX + earthRadius * Math.cos(latitudeRadians) *
-            Math.sin(longitudeRadians);
-        const y = centerY - earthRadius * Math.sin(latitudeRadians);
-        const strength = Math.min(1, probability / 100);
-        context.globalAlpha = .25 + strength * .7;
-        context.fillStyle = probability >= 40 ? "#c6f36b" : "#7ce8ff";
-        context.shadowColor = context.fillStyle;
-        context.shadowBlur = 3 + strength * 8;
-        context.beginPath();
-        context.arc(x, y, 1 + strength * 2.2, 0, Math.PI * 2);
-        context.fill();
-    });
-    context.restore();
-}
-
-function formatMeasurement(value) {
-    return Number.isFinite(value) ? value.toFixed(1) : "—";
-}
-
-async function refreshConditions() {
-    if (isLoadingConditions) {
-        return;
-    }
-
-    isLoadingConditions = true;
-    conditionsRefresh.disabled = true;
-    conditionsStatus.classList.remove("is-warning");
-    conditionsStatus.textContent = "Loading NOAA SWPC conditions…";
-
-    try {
-        const response = await fetch("/api/earth-conditions", {
-            headers: { Accept: "application/json" }
-        });
-        const data = await readResponse(response);
-        const errors = data.errors || {};
-        if (
-            (!data.aurora && !errors.aurora) ||
-            (!data.magneticField && !errors.magneticField)
-        ) {
-            throw new Error("NOAA SWPC returned an incomplete live-conditions response.");
-        }
-
-        if (data.aurora) {
-            auroraPoints = Array.isArray(data.aurora.points) ? data.aurora.points : [];
-            auroraPeak.textContent = formatMeasurement(data.aurora.peakProbability);
-            auroraTime.dateTime = data.aurora.forecastTime || data.aurora.observationTime || "";
-            auroraTime.textContent = formatTime(auroraTime.dateTime, true) || "Time not provided";
-        } else {
-            auroraPoints = [];
-            auroraPeak.textContent = "—";
-            auroraTime.textContent = errors.aurora || "Forecast unavailable";
-            auroraTime.removeAttribute("datetime");
-        }
-
-        if (data.magneticField) {
-            bzValue.textContent = formatMeasurement(data.magneticField.bz);
-            btValue.textContent = formatMeasurement(data.magneticField.bt);
-            magneticTime.dateTime = data.magneticField.time || "";
-            magneticTime.textContent =
-                formatTime(data.magneticField.time, true) || "Time not provided";
-        } else {
-            bzValue.textContent = "—";
-            btValue.textContent = "—";
-            magneticTime.textContent = errors.magneticField || "Measurements unavailable";
-            magneticTime.removeAttribute("datetime");
-        }
-
-        const failures = [];
-        if (errors.aurora) {
-            failures.push(`Aurora forecast: ${errors.aurora}`);
-        }
-        if (errors.magneticField) {
-            failures.push(`Magnetic field: ${errors.magneticField}`);
-        }
-        conditionsStatus.textContent = failures.length > 0
-            ? `Some live conditions are unavailable. ${failures.join(" ")}`
-            : `Live conditions updated ${formatTime(data.generatedAt, true)}.`;
-        conditionsStatus.classList.toggle("is-warning", failures.length > 0);
-        conditionsNote.textContent =
-            "Aurora forecast and solar-wind magnetic field from NOAA SWPC; NASA flare reports from DONKI.";
-        drawAuroraScene();
-    } catch (error) {
-        console.error("Unable to refresh live Earth conditions.", error);
-        auroraPoints = [];
-        auroraPeak.textContent = "—";
-        bzValue.textContent = "—";
-        btValue.textContent = "—";
-        auroraTime.textContent = "Forecast unavailable";
-        magneticTime.textContent = "Measurements unavailable";
-        conditionsStatus.textContent = error.message;
-        conditionsStatus.classList.add("is-warning");
-        conditionsNote.textContent = "NOAA SWPC live conditions could not be loaded.";
-        drawAuroraScene();
-    } finally {
-        isLoadingConditions = false;
-        conditionsRefresh.disabled = false;
-    }
 }
 
 function getSatellitePosition(satellite, now) {
@@ -661,6 +445,80 @@ function drawSatelliteScene() {
     context.restore();
 }
 
+function stopEpicAnimation() {
+    if (epicInterval !== null) {
+        window.clearInterval(epicInterval);
+        epicInterval = null;
+    }
+}
+
+function showEpicFrame(index) {
+    if (epicImages.length === 0) return;
+    epicIndex = (index + epicImages.length) % epicImages.length;
+    const image = epicImages[epicIndex];
+    epicImage.src = image.image;
+    epicImage.hidden = false;
+    const date = formatTime(image.date, true) || image.date;
+    epicCaption.textContent =
+        `${epicIndex + 1} of ${epicImages.length} · ${date} · ${image.caption}`;
+}
+
+function playEpicAnimation() {
+    if (epicImages.length === 0) return;
+    stopEpicAnimation();
+    epicPlay.textContent = "Pause animation";
+    epicInterval = window.setInterval(() => {
+        showEpicFrame(epicIndex + 1);
+    }, 2200);
+}
+
+async function refreshEpic() {
+    if (isLoadingEpic) return;
+    isLoadingEpic = true;
+    epicRefresh.disabled = true;
+    epicPlay.disabled = true;
+    epicStatus.classList.remove("is-warning");
+    epicStatus.textContent = "Loading the latest Earth images…";
+    stopEpicAnimation();
+
+    try {
+        const response = await fetch("/api/epic", {
+            headers: { Accept: "application/json" },
+            cache: "no-store"
+        });
+        const data = await readResponse(response);
+        if (!Array.isArray(data.images) || data.images.length === 0) {
+            throw new Error("NASA EPIC returned no Earth images.");
+        }
+
+        epicImages = data.images.slice().sort((left, right) =>
+            String(left.date).localeCompare(String(right.date))
+        );
+        epicIndex = 0;
+        showEpicFrame(0);
+        epicPrev.disabled = epicImages.length < 2;
+        epicNext.disabled = epicImages.length < 2;
+        epicPlay.disabled = epicImages.length < 2;
+        epicStatus.textContent =
+            `One DSCOVR EPIC image per available day · Updated ${formatTime(data.generatedAt, true)}.`;
+
+        if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            playEpicAnimation();
+        } else {
+            epicPlay.textContent = "Play animation";
+        }
+    } catch (error) {
+        console.error("Unable to refresh NASA EPIC images.", error);
+        epicStatus.textContent = error.message;
+        epicStatus.classList.add("is-warning");
+        epicImage.hidden = true;
+        epicCaption.textContent = "Earth images are temporarily unavailable.";
+    } finally {
+        isLoadingEpic = false;
+        epicRefresh.disabled = false;
+    }
+}
+
 async function refreshSatellites() {
     if (isLoadingSatellites) {
         return;
@@ -740,14 +598,6 @@ async function refreshDashboard() {
         liveIndicator.dataset.state = "error";
         nasaNote.textContent = error.message;
         nasaNote.classList.add("is-warning");
-        latestFlareTitle.textContent = "NASA DONKI data unavailable";
-        latestFlareTime.textContent = "";
-        latestFlareTime.removeAttribute("datetime");
-        nasaNotifications.replaceChildren();
-        const unavailableNote = document.createElement("p");
-        unavailableNote.className = "section-status";
-        unavailableNote.textContent = "NASA DONKI notifications could not be loaded.";
-        nasaNotifications.append(unavailableNote);
         animationStatus.textContent = "NASA event data is unavailable.";
         animationStatus.classList.add("is-warning");
     } finally {
@@ -767,16 +617,31 @@ animationToggle.addEventListener("click", () => {
 });
 
 refreshButton.addEventListener("click", refreshDashboard);
-conditionsRefresh.addEventListener("click", refreshConditions);
+epicRefresh.addEventListener("click", refreshEpic);
+epicPrev.addEventListener("click", () => {
+    stopEpicAnimation();
+    epicPlay.textContent = "Play animation";
+    showEpicFrame(epicIndex - 1);
+});
+epicNext.addEventListener("click", () => {
+    stopEpicAnimation();
+    epicPlay.textContent = "Play animation";
+    showEpicFrame(epicIndex + 1);
+});
+epicPlay.addEventListener("click", () => {
+    if (epicInterval === null) {
+        playEpicAnimation();
+    } else {
+        stopEpicAnimation();
+        epicPlay.textContent = "Play animation";
+    }
+});
 satelliteRefresh.addEventListener("click", refreshSatellites);
 window.addEventListener("resize", () => {
     drawSatelliteScene();
-    drawAuroraScene();
 });
 drawSatelliteScene();
-drawAuroraScene();
 refreshDashboard();
-refreshConditions();
+refreshEpic();
 refreshSatellites();
 window.setInterval(refreshDashboard, 5 * 60 * 1000);
-window.setInterval(refreshConditions, 5 * 60 * 1000);
