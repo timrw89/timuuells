@@ -30,14 +30,6 @@ const sourceDefinitions = [
             { url: 'https://forkintherhode.com/category/rhode-island-restaurant-reviews/', type: 'html' }
         ],
     },
-    {
-        id: 'the-infatuation',
-        name: 'The Infatuation',
-        host: 'theinfatuation.com',
-        urls: [
-            { url: 'https://www.theinfatuation.com/providence', type: 'html' }
-        ],
-    },
 ];
 
 const reviewState = sourceDefinitions.map((source) => ({
@@ -105,38 +97,22 @@ function parseHtml(source, html, pageUrl) {
     const $ = cheerio.load(html);
     const reviews = [];
 
-    if (source.id === 'the-infatuation') {
-        $('h3').each((_, element) => {
-            const titleElement = $(element);
-            const card = titleElement.closest('.chakra-linkbox');
-            const imageElement = card.find('img').first();
-            const review = makeReview(
-                source,
-                titleElement.text(),
-                imageFromElement($, imageElement),
-                titleElement.closest('a').attr('href'),
-                pageUrl
-            );
-            if (review) reviews.push(review);
-        });
-    } else {
-        $('article').each((_, element) => {
-            const card = $(element);
-            const titleElement = card.find(
-                '.entry-title a, h2 a, h3 a, h4 a'
-            ).first();
-            const imageElement = card.find('img').first();
-            const imageAnchor = imageElement.closest('a');
-            const review = makeReview(
-                source,
-                titleElement.text() || titleElement.attr('aria-label') || imageElement.attr('alt'),
-                imageFromElement($, imageElement),
-                titleElement.attr('href') || imageAnchor.attr('href') || card.find('a[href]').first().attr('href'),
-                pageUrl
-            );
-            if (review) reviews.push(review);
-        });
-    }
+    $('article').each((_, element) => {
+        const card = $(element);
+        const titleElement = card.find(
+            '.entry-title a, h2 a, h3 a, h4 a'
+        ).first();
+        const imageElement = card.find('img').first();
+        const imageAnchor = imageElement.closest('a');
+        const review = makeReview(
+            source,
+            titleElement.text() || titleElement.attr('aria-label') || imageElement.attr('alt'),
+            imageFromElement($, imageElement),
+            titleElement.attr('href') || imageAnchor.attr('href') || card.find('a[href]').first().attr('href'),
+            pageUrl
+        );
+        if (review) reviews.push(review);
+    });
 
     return uniqueReviews(reviews);
 }

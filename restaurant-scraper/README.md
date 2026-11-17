@@ -1,6 +1,6 @@
 # Digest Rhody
 
-Digest Rhody collects restaurant stories from Rhode Island Monthly, Fork in the Rhode, and The Infatuation. Its responsive page is served by an Express app, which fetches the sources on startup and when **Refresh reviews** is clicked. Each source can fail independently, and up to eight entries are shown per source.
+Digest Rhody collects restaurant stories from Rhode Island Monthly and Fork in the Rhode. Its responsive page is served by an Express app, which fetches the sources on startup and when **Refresh reviews** is clicked. Each source can fail independently, and up to eight entries are shown per source.
 
 ## Run locally
 
