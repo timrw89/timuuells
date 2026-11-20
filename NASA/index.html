@@ -136,6 +136,19 @@
                     </select>
                 </div>
             </div>
+            <div class="flare-image-panel" id="timeline-flare-image" aria-busy="false">
+                <div class="flare-image-copy">
+                    <p class="section-index">HELIOVIEWER / SDO AIA 131 Å</p>
+                    <h3 id="timeline-flare-image-title">Solar flare imagery</h3>
+                    <p id="timeline-flare-image-status" role="status" aria-live="polite">Pause the timeline on a DONKI solar flare to load the nearest image.</p>
+                </div>
+                <figure class="flare-image-figure">
+                    <a id="timeline-flare-image-link" target="_blank" rel="noopener noreferrer" hidden>
+                        <img id="timeline-flare-image-element" alt="" loading="lazy" hidden>
+                    </a>
+                    <figcaption id="timeline-flare-image-caption">Helioviewer images are selected from the SDO/AIA 131 Å channel nearest to the flare time.</figcaption>
+                </figure>
+            </div>
         </section>
 
         <section class="dashboard-section satellite-section" aria-labelledby="satellite-title">

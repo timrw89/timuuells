@@ -610,6 +610,12 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
     const scrubber = element("scrubber");
     const rangeLabel = element("range-label");
     const speedSelect = element("speed");
+    const flareImagePanel = element("flare-image");
+    const flareImageTitle = element("flare-image-title");
+    const flareImageStatus = element("flare-image-status");
+    const flareImageLink = element("flare-image-link");
+    const flareImage = element("flare-image-element");
+    const flareImageCaption = element("flare-image-caption");
 
     let events = [];
     let playing = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -620,12 +626,96 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
     let minTimestamp = 0;
     let maxTimestamp = 1;
     let stars = [];
+    let flareImageController = null;
+    let flareImageRequest = 0;
     const played = new Set();
     const pulses = [];
     playButton.textContent = playing ? "Pause" : "Play";
+    if (flareImage) {
+        flareImage.addEventListener("error", () => {
+            if (flareImage.dataset.requestId !== String(flareImageRequest)) return;
+            flareImage.hidden = true;
+            flareImageLink.hidden = true;
+            flareImageStatus.textContent =
+                "Helioviewer found a matching image, but it could not be downloaded.";
+        });
+    }
 
     function eventColor(event) {
         return colors[`${event.type}:${event.flareBand}`] || colors[event.type] || "#38bdf8";
+    }
+
+    function clearFlareImage() {
+        flareImageRequest += 1;
+        if (flareImageController) {
+            flareImageController.abort();
+            flareImageController = null;
+        }
+        flareImageLink.hidden = true;
+        flareImage.hidden = true;
+        delete flareImage.dataset.requestId;
+        flareImage.removeAttribute("src");
+        flareImageCaption.textContent =
+            "Helioviewer images are selected from the SDO/AIA 131 Å channel nearest to the flare time.";
+    }
+
+    async function loadFlareImage(event) {
+        if (!flareImagePanel) return;
+        if (event.type !== "FLR") {
+            clearFlareImage();
+            flareImageTitle.textContent = "Solar flare imagery";
+            flareImageStatus.textContent = "Select a DONKI solar flare to load the nearest image.";
+            flareImagePanel.setAttribute("aria-busy", "false");
+            return;
+        }
+        if (playing) {
+            clearFlareImage();
+            flareImageStatus.textContent = "Pause playback to load an image for this flare.";
+            flareImagePanel.setAttribute("aria-busy", "false");
+            return;
+        }
+
+        clearFlareImage();
+        const requestId = flareImageRequest;
+        flareImageController = new AbortController();
+        flareImageTitle.textContent = `${event.flareClass || "DONKI"} flare`;
+        flareImageStatus.textContent = "Finding the closest SDO/AIA image…";
+        flareImagePanel.setAttribute("aria-busy", "true");
+
+        try {
+            const date = new Date(event.timestamp).toISOString();
+            const response = await fetch(`/api/helioviewer?date=${encodeURIComponent(date)}`, {
+                headers: { Accept: "application/json" },
+                signal: flareImageController.signal
+            });
+            const data = await readResponse(response);
+            if (requestId !== flareImageRequest) return;
+
+            flareImageLink.href = data.imageUrl;
+            flareImageLink.hidden = false;
+            flareImage.alt = `${data.imageName} image nearest to ${data.imageAt} UTC`;
+            flareImage.dataset.requestId = String(requestId);
+            flareImage.src = data.imageUrl;
+            flareImage.hidden = false;
+            flareImageCaption.textContent =
+                `${data.imageName} · image time ${data.imageAt} UTC · `;
+            const attribution = document.createElement("a");
+            attribution.href = data.attributionUrl;
+            attribution.target = "_blank";
+            attribution.rel = "noopener noreferrer";
+            attribution.textContent = "Helioviewer";
+            flareImageCaption.append(attribution);
+            flareImageStatus.textContent = "Nearest available image for the selected flare.";
+        } catch (error) {
+            if (error.name === "AbortError" || requestId !== flareImageRequest) return;
+            console.error("Unable to load Helioviewer image for DONKI flare.", error);
+            flareImageStatus.textContent = error.message;
+        } finally {
+            if (requestId === flareImageRequest) {
+                flareImagePanel.setAttribute("aria-busy", "false");
+                flareImageController = null;
+            }
+        }
     }
 
     function resize() {
@@ -660,6 +750,7 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
         badge.style.color = eventColor(event);
         detail.textContent = event.detail;
         scrubber.value = String(index);
+        if (flareImagePanel) loadFlareImage(event);
 
         const bounds = canvas.getBoundingClientRect();
         const margin = Math.min(60, bounds.width * .08);
@@ -787,6 +878,7 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
     playButton.addEventListener("click", () => {
         playing = !playing;
         playButton.textContent = playing ? "Pause" : "Play";
+        if (!playing && selectedIndex >= 0) loadFlareImage(events[selectedIndex]);
     });
     restartButton.addEventListener("click", () => {
         played.clear();
