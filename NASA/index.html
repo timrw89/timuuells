@@ -91,12 +91,22 @@
                         <input id="swpc-timeline-scrubber" type="range" min="0" max="100" value="0" disabled>
                     </label>
                     <select class="timeline-speed timeline-control-speed" id="swpc-timeline-speed" aria-label="GOES timeline playback speed" disabled>
-                        <option value="550">0.5x</option>
-                        <option value="280" selected>1x</option>
+                        <option value="550" selected>0.5x</option>
+                        <option value="280">1x</option>
                         <option value="120">2x</option>
                         <option value="50">5x</option>
                     </select>
                 </div>
+            </div>
+            <div class="goes-flare-gallery" id="swpc-flare-gallery" aria-busy="true">
+                <div class="goes-flare-gallery-heading">
+                    <div>
+                        <p class="section-index">HELIOVIEWER / MATCHED TO NOAA GOES</p>
+                        <h3>Solar images at NOAA flare times</h3>
+                    </div>
+                    <p id="swpc-flare-gallery-status" role="status" aria-live="polite">Loading flare timestamps…</p>
+                </div>
+                <div class="goes-flare-grid" id="swpc-flare-grid"></div>
             </div>
         </section>
 

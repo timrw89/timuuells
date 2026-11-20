@@ -598,7 +598,16 @@ drawSatelliteScene();
 refreshEpic();
 refreshSatellites();
 
-function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describe }) {
+function createTimelinePlayer({
+    prefix,
+    endpoint,
+    colors,
+    labels,
+    types,
+    describe,
+    onDataLoaded,
+    onLoadError
+}) {
     const element = (suffix) => document.querySelector(`#${prefix}-${suffix}`);
     const player = element("player");
     const canvas = element("canvas");
@@ -619,7 +628,7 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
 
     let events = [];
     let playing = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let stepInterval = 280;
+    let stepInterval = Number(speedSelect.value);
     let lastStepTime = 0;
     let playbackIndex = 0;
     let selectedIndex = -1;
@@ -842,6 +851,7 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
             events = Array.isArray(data.events)
                 ? data.events.slice().sort((left, right) => left.timestamp - right.timestamp)
                 : [];
+            if (onDataLoaded) onDataLoaded(data, events);
             if (events.length === 0) {
                 rangeLabel.textContent = data.emptyMessage || "No timeline events were returned.";
                 player.setAttribute("aria-busy", "false");
@@ -867,6 +877,7 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
         } catch (error) {
             console.error(`Unable to load timeline from ${endpoint}.`, error);
             rangeLabel.textContent = error.message;
+            if (onLoadError) onLoadError(error);
             player.setAttribute("aria-busy", "false");
             playButton.disabled = true;
             restartButton.disabled = true;
@@ -899,6 +910,130 @@ function createTimelinePlayer({ prefix, endpoint, colors, labels, types, describ
     load();
 }
 
+function renderNoaaFlareGallery(data, events) {
+    const gallery = document.querySelector("#swpc-flare-gallery");
+    const status = document.querySelector("#swpc-flare-gallery-status");
+    const grid = document.querySelector("#swpc-flare-grid");
+    const flares = events.filter((event) => event.type === "FLR");
+    grid.replaceChildren();
+    gallery.setAttribute("aria-busy", "false");
+
+    if (flares.length === 0) {
+        status.textContent = "No C-class or stronger GOES flares were reported in this 7-day window.";
+        return;
+    }
+
+    status.textContent =
+        `${data.startDate} to ${data.endDate} · ${flares.length} NOAA flare${flares.length === 1 ? "" : "s"} · images load as you scroll`;
+
+    const waiting = [];
+    const cardsByElement = new Map();
+    let activeRequests = 0;
+    function processQueue() {
+        while (activeRequests < 3 && waiting.length > 0) {
+            const card = waiting.shift();
+            activeRequests += 1;
+            loadImage(card).finally(() => {
+                activeRequests -= 1;
+                processQueue();
+            });
+        }
+    }
+
+    async function loadImage(card) {
+        card.status.textContent = "Finding the closest SDO/AIA image…";
+        try {
+            const date = new Date(card.event.timestamp).toISOString();
+            const response = await fetch(`/api/helioviewer?date=${encodeURIComponent(date)}`, {
+                headers: { Accept: "application/json" }
+            });
+            const image = await readResponse(response);
+            card.caption.textContent = `${image.imageName} · image time ${image.imageAt} UTC · `;
+            const attribution = document.createElement("a");
+            attribution.href = image.attributionUrl;
+            attribution.target = "_blank";
+            attribution.rel = "noopener noreferrer";
+            attribution.textContent = "Helioviewer";
+            card.caption.append(attribution);
+            card.image.alt = `${image.imageName} image nearest to NOAA flare at ${card.event.date} ${card.event.time} UTC`;
+            card.image.addEventListener("load", () => {
+                card.status.textContent = `Image loaded · ${image.imageAt} UTC`;
+            }, { once: true });
+            card.image.addEventListener("error", () => {
+                card.image.hidden = true;
+                card.status.textContent = "The matching image could not be downloaded.";
+            }, { once: true });
+            card.image.src = image.imageUrl;
+            card.image.hidden = false;
+        } catch (error) {
+            console.error("Unable to load Helioviewer image for NOAA flare.", error);
+            card.status.textContent = error.message;
+        }
+    }
+
+    flares.forEach((event) => {
+        const card = document.createElement("article");
+        card.className = "goes-flare-card";
+
+        const heading = document.createElement("h4");
+        heading.textContent = `${event.flareClass || "GOES"} flare`;
+        card.append(heading);
+
+        const time = document.createElement("time");
+        time.dateTime = new Date(event.timestamp).toISOString();
+        time.textContent = `${event.date} ${event.time} UTC`;
+        card.append(time);
+
+        const image = document.createElement("img");
+        image.loading = "lazy";
+        image.hidden = true;
+        card.append(image);
+
+        const imageStatus = document.createElement("p");
+        imageStatus.className = "goes-flare-image-status";
+        imageStatus.textContent = "Waiting to load the image…";
+        card.append(imageStatus);
+
+        const caption = document.createElement("p");
+        caption.className = "goes-flare-image-caption";
+        card.append(caption);
+
+        const entry = { event, image, status: imageStatus, caption };
+        grid.append(card);
+        waiting.push(entry);
+    });
+
+    const observer = "IntersectionObserver" in window
+        ? new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                observer.unobserve(entry.target);
+                const card = cardsByElement.get(entry.target);
+                cardsByElement.delete(entry.target);
+                if (card) waiting.push(card);
+                processQueue();
+            });
+        }, { rootMargin: "160px" })
+        : null;
+
+    if (observer) {
+        Array.from(grid.children).forEach((card, index) => {
+            cardsByElement.set(card, waiting[index]);
+            observer.observe(card);
+        });
+        waiting.length = 0;
+    } else {
+        processQueue();
+    }
+}
+
+function reportNoaaFlareGalleryError(error) {
+    const gallery = document.querySelector("#swpc-flare-gallery");
+    const status = document.querySelector("#swpc-flare-gallery-status");
+    gallery.setAttribute("aria-busy", "false");
+    status.textContent = `Unable to load NOAA flare timestamps: ${error.message}`;
+}
+
 createTimelinePlayer({
     prefix: "swpc-timeline",
     endpoint: "/api/noaa-flares",
@@ -910,6 +1045,8 @@ createTimelinePlayer({
     },
     labels: { FLR: "GOES X-ray flare" },
     types: ["FLR"],
+    onDataLoaded: renderNoaaFlareGallery,
+    onLoadError: reportNoaaFlareGalleryError,
     describe: (data) =>
         `${data.startDate} to ${data.endDate} · ${data.eventCount} C-class or stronger flares · ${formatNumber(data.sampleCount)} X-ray samples`
 });
