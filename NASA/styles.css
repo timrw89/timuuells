@@ -494,7 +494,7 @@ p {
     left: 1rem;
     display: grid;
     grid-template-columns: auto auto minmax(8rem, 1fr) auto;
-    grid-template-areas: "play restart scrubber speed";
+    grid-template-areas: "play restart status speed";
     align-items: center;
     gap: .65rem;
     padding: .7rem;
@@ -505,19 +505,13 @@ p {
 
 .timeline-control-play { grid-area: play; }
 .timeline-control-restart { grid-area: restart; }
-.timeline-control-scrubber { grid-area: scrubber; min-width: 0; }
+.timeline-control-status { grid-area: status; min-width: 0; }
 .timeline-control-speed { grid-area: speed; }
 
-.timeline-scrubber {
-    display: grid;
-    gap: .25rem;
+.timeline-range-status {
     color: var(--color-muted);
     font-size: .68rem;
-}
-
-.timeline-scrubber input {
-    width: 100%;
-    accent-color: #38bdf8;
+    overflow-wrap: anywhere;
 }
 
 .timeline-speed {
@@ -624,7 +618,7 @@ p {
         grid-template-columns: auto auto minmax(0, 1fr);
         grid-template-areas:
             "play restart speed"
-            "scrubber scrubber scrubber";
+            "status status status";
     }
 
     .timeline-player-goes .timeline-controls {

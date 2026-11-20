@@ -747,7 +747,7 @@ function createTimelinePlayer({
 
     function eventY(type, height) {
         const lane = Math.max(0, types.indexOf(type));
-        return height * (.52 + verticalOffset) + (lane - (types.length - 1) / 2) * 70;
+        return height * (.52 + verticalOffset) + (lane - (types.length - 1) / 2) * 56;
     }
 
     function showEvent(index) {
@@ -790,9 +790,9 @@ function createTimelinePlayer({
             x: margin + fraction * Math.max(1, bounds.width - margin * 2),
             y: eventY(event.type, bounds.height),
             color: eventColor(event),
-            radius: 4,
-            maxRadius: 18 + (event.intensity || 1) * 5,
-            alpha: 1
+            radius: 3,
+            maxRadius: 12 + (event.intensity || 1) * 3,
+            alpha: .75
         });
     }
 
@@ -855,7 +855,7 @@ function createTimelinePlayer({
             }
             context.strokeStyle = pulse.color;
             context.globalAlpha = pulse.alpha;
-            context.lineWidth = 2;
+            context.lineWidth = 1;
             context.beginPath();
             context.arc(pulse.x, pulse.y, pulse.radius, 0, Math.PI * 2);
             context.stroke();
