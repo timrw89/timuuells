@@ -960,6 +960,7 @@ function createNoaaFlareImagePlayer() {
         link.hidden = true;
         image.hidden = true;
         status.textContent = message;
+        count.textContent = "Flare sequence unavailable";
     }
 
     async function showEvent(event, index, total) {

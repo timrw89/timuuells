@@ -374,7 +374,26 @@ p {
 }
 
 .timeline-player-goes .flare-image-figure img {
-    max-height: 23rem;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: contain;
+}
+
+.timeline-player-goes .flare-image-figure {
+    display: grid;
+    grid-template-rows: minmax(0, 23rem) 3rem;
+    height: 26rem;
+}
+
+.timeline-player-goes .flare-image-figure > a {
+    grid-row: 1;
+    min-height: 0;
+}
+
+.timeline-player-goes .flare-image-figure figcaption {
+    grid-row: 2;
+    overflow: hidden;
 }
 
 .timeline-player canvas {
