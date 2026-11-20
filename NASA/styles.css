@@ -345,6 +345,38 @@ p {
     background: #05070e;
 }
 
+.timeline-player-goes {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(17rem, .85fr);
+    align-items: stretch;
+    gap: 1rem;
+    min-height: 38rem;
+    padding: 1rem 1rem 5.4rem;
+}
+
+.goes-timeline-visual {
+    position: relative;
+    min-width: 0;
+    min-height: 31rem;
+}
+
+.goes-timeline-visual canvas {
+    height: 31rem;
+}
+
+.timeline-player-goes .flare-image-panel {
+    grid-template-columns: 1fr;
+    align-content: center;
+    gap: .75rem;
+    min-width: 0;
+    margin: 0;
+    padding: .8rem;
+}
+
+.timeline-player-goes .flare-image-figure img {
+    max-height: 23rem;
+}
+
 .timeline-player canvas {
     display: block;
     width: 100%;
@@ -483,10 +515,6 @@ p {
     line-height: 1.5;
 }
 
-#swpc-flare-image {
-    margin-top: 1.5rem;
-}
-
 .flare-image-panel {
     display: grid;
     grid-template-columns: minmax(12rem, .75fr) minmax(0, 1.25fr);
@@ -532,6 +560,24 @@ p {
     color: var(--color-cyan);
 }
 
+@media (max-width: 850px) {
+    .timeline-player-goes {
+        grid-template-columns: 1fr;
+        min-height: 0;
+        padding: 1rem 1rem 6rem;
+    }
+
+    .goes-timeline-visual,
+    .goes-timeline-visual canvas {
+        min-height: 28rem;
+        height: 28rem;
+    }
+
+    .timeline-player-goes .flare-image-panel {
+        grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr);
+    }
+}
+
 @media (max-width: 600px) {
     .timeline-hud {
         flex-direction: column;
@@ -550,6 +596,20 @@ p {
 
     .timeline-control-speed {
         justify-self: end;
+    }
+
+    .timeline-player-goes {
+        padding: .75rem .75rem 6rem;
+    }
+
+    .goes-timeline-visual,
+    .goes-timeline-visual canvas {
+        min-height: 26rem;
+        height: 26rem;
+    }
+
+    .timeline-player-goes .flare-image-panel {
+        grid-template-columns: 1fr;
     }
 
     .flare-image-panel {

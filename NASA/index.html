@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="View NASA EPIC Earth images, explore NASA solar alerts, and view CelesTrak's last-30-days satellite group.">
     <meta name="theme-color" content="#090d16">
-    <title>Space Weather — NASA DONKI</title>
+    <title>Space Weather</title>
     <link rel="stylesheet" href="./styles.css">
     <script src="./script.js" defer></script>
 </head>
@@ -69,19 +69,35 @@
             <p class="section-status">
                 C-class and stronger flare intervals are derived from the GOES 0.1–0.8 nm X-ray flux.
             </p>
-            <div class="timeline-player" id="swpc-timeline-player" aria-busy="true">
-                <canvas id="swpc-timeline-canvas" aria-label="Animated NOAA GOES X-ray flare timeline"></canvas>
-                <div class="timeline-hud">
-                    <div class="timeline-readout">
-                        <time id="swpc-timeline-date">Loading timeline</time>
-                        <strong id="swpc-timeline-badge">GOES X-ray flare</strong>
-                        <span id="swpc-timeline-detail">Fetching NOAA SWPC measurements…</span>
+            <div class="timeline-player timeline-player-goes" id="swpc-timeline-player" aria-busy="true">
+                <div class="goes-timeline-visual">
+                    <canvas id="swpc-timeline-canvas" aria-label="Animated NOAA GOES X-ray flare timeline"></canvas>
+                    <div class="timeline-hud">
+                        <div class="timeline-readout">
+                            <time id="swpc-timeline-date">Loading timeline</time>
+                            <strong id="swpc-timeline-badge">GOES X-ray flare</strong>
+                            <span id="swpc-timeline-detail">Fetching NOAA SWPC measurements…</span>
+                        </div>
+                        <div class="timeline-legend" aria-label="Event types">
+                            <span><i class="timeline-dot flare-class-c"></i>C-class</span>
+                            <span><i class="timeline-dot flare-class-m"></i>M-class</span>
+                            <span><i class="timeline-dot flare-class-x"></i>X-class</span>
+                        </div>
                     </div>
-                    <div class="timeline-legend" aria-label="Event types">
-                        <span><i class="timeline-dot flare-class-c"></i>C-class</span>
-                        <span><i class="timeline-dot flare-class-m"></i>M-class</span>
-                        <span><i class="timeline-dot flare-class-x"></i>X-class</span>
+                </div>
+                <div class="flare-image-panel" id="swpc-flare-image" aria-busy="true">
+                    <div class="flare-image-copy">
+                        <p class="section-index">HELIOVIEWER / MATCHED TO NOAA GOES</p>
+                        <h3 id="swpc-flare-image-title">NOAA flare images</h3>
+                        <p id="swpc-flare-image-status" role="status" aria-live="polite">Loading NOAA flare timestamps…</p>
+                        <span class="flare-image-count" id="swpc-flare-image-count" aria-live="polite">Loading flare sequence…</span>
                     </div>
+                    <figure class="flare-image-figure">
+                        <a id="swpc-flare-image-link" target="_blank" rel="noopener noreferrer" hidden>
+                            <img id="swpc-flare-image-element" alt="" loading="lazy" hidden>
+                        </a>
+                        <figcaption id="swpc-flare-image-caption">SDO/AIA 131 Å images will appear here in NOAA flare-time order.</figcaption>
+                    </figure>
                 </div>
                 <div class="timeline-controls">
                     <button class="refresh-button timeline-control-play" id="swpc-timeline-play" type="button" disabled>Pause</button>
@@ -97,20 +113,6 @@
                         <option value="800">5x</option>
                     </select>
                 </div>
-            </div>
-            <div class="flare-image-panel" id="swpc-flare-image" aria-busy="true">
-                <div class="flare-image-copy">
-                    <p class="section-index">HELIOVIEWER / MATCHED TO NOAA GOES</p>
-                    <h3 id="swpc-flare-image-title">NOAA flare images</h3>
-                    <p id="swpc-flare-image-status" role="status" aria-live="polite">Loading NOAA flare timestamps…</p>
-                    <span class="flare-image-count" id="swpc-flare-image-count" aria-live="polite">Loading flare sequence…</span>
-                </div>
-                <figure class="flare-image-figure">
-                    <a id="swpc-flare-image-link" target="_blank" rel="noopener noreferrer" hidden>
-                        <img id="swpc-flare-image-element" alt="" loading="lazy" hidden>
-                    </a>
-                    <figcaption id="swpc-flare-image-caption">SDO/AIA 131 Å images will appear here in NOAA flare-time order.</figcaption>
-                </figure>
             </div>
         </section>
 
