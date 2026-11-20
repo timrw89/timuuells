@@ -945,12 +945,12 @@ function createNoaaFlareImagePlayer() {
 
     let flares = [];
     let requestId = 0;
-    let controller = null;
     let settleImageLoad = null;
     const imageCache = new Map();
+    const imageErrors = new Map();
+    let preloadPromise = Promise.resolve();
 
     function setError(message) {
-        if (controller) controller.abort();
         if (settleImageLoad) {
             settleImageLoad(false);
             settleImageLoad = null;
@@ -963,12 +963,79 @@ function createNoaaFlareImagePlayer() {
         count.textContent = "Flare sequence unavailable";
     }
 
+    function preloadImage(url) {
+        return new Promise((resolve, reject) => {
+            const preloadedImage = new Image();
+            let loading = false;
+            let settled = false;
+
+            function fail(error) {
+                if (settled) return;
+                settled = true;
+                reject(error);
+            }
+
+            async function finish() {
+                if (loading || settled) return;
+                loading = true;
+                try {
+                    if (typeof preloadedImage.decode === "function") {
+                        await preloadedImage.decode();
+                    }
+                    if (settled) return;
+                    settled = true;
+                    resolve(preloadedImage);
+                } catch (error) {
+                    fail(error);
+                }
+            }
+
+            preloadedImage.onload = finish;
+            preloadedImage.onerror = () => fail(
+                new Error("The matching Helioviewer image could not be downloaded.")
+            );
+            preloadedImage.src = url;
+            if (preloadedImage.complete) {
+                if (preloadedImage.naturalWidth > 0) finish();
+                else fail(new Error("The matching Helioviewer image could not be downloaded."));
+            }
+        });
+    }
+
+    async function preloadAllImages() {
+        let nextIndex = 0;
+        let completed = 0;
+
+        async function preloadWorker() {
+            while (nextIndex < flares.length) {
+                const event = flares[nextIndex];
+                nextIndex += 1;
+                const date = new Date(event.timestamp).toISOString();
+                try {
+                    const response = await fetch(`/api/helioviewer?date=${encodeURIComponent(date)}`, {
+                        headers: { Accept: "application/json" }
+                    });
+                    const data = await readResponse(response);
+                    const preloadedImage = await preloadImage(data.imageUrl);
+                    imageCache.set(date, { data, preloadedImage });
+                } catch (error) {
+                    imageErrors.set(date, error);
+                    console.error("Unable to preload Helioviewer image for NOAA flare.", error);
+                } finally {
+                    completed += 1;
+                    status.textContent = `Preloading NOAA flare images ${completed} / ${flares.length}…`;
+                    count.textContent = `${completed} / ${flares.length} images processed`;
+                }
+            }
+        }
+
+        await Promise.all(
+            Array.from({ length: Math.min(3, flares.length) }, preloadWorker)
+        );
+    }
+
     async function showEvent(event, index, total) {
         if (event.type !== "FLR") return;
-        if (controller) {
-            controller.abort();
-            controller = null;
-        }
         if (settleImageLoad) {
             settleImageLoad(false);
             settleImageLoad = null;
@@ -976,26 +1043,22 @@ function createNoaaFlareImagePlayer() {
 
         const currentRequest = ++requestId;
         const date = new Date(event.timestamp).toISOString();
-        controller = new AbortController();
         panel.setAttribute("aria-busy", "true");
         title.textContent = `${event.flareClass || "GOES"} flare`;
-        status.textContent = "Finding the closest SDO/AIA image…";
+        status.textContent = "Waiting for all NOAA flare images to load…";
         count.textContent = `${index + 1} / ${total} flares`;
-        link.hidden = true;
-        image.hidden = true;
 
         try {
-            let data = imageCache.get(date);
-            if (!data) {
-                const response = await fetch(`/api/helioviewer?date=${encodeURIComponent(date)}`, {
-                    headers: { Accept: "application/json" },
-                    signal: controller.signal
-                });
-                data = await readResponse(response);
-                imageCache.set(date, data);
-            }
+            await preloadPromise;
             if (currentRequest !== requestId) return;
+            count.textContent = `${index + 1} / ${total} flares`;
+            const frame = imageCache.get(date);
+            if (!frame) {
+                throw imageErrors.get(date) ||
+                    new Error("No matching Helioviewer image was available for this NOAA flare.");
+            }
 
+            const { data } = frame;
             link.href = data.imageUrl;
             link.hidden = false;
             image.alt =
@@ -1022,13 +1085,14 @@ function createNoaaFlareImagePlayer() {
             if (!loaded) throw new Error("The matching Helioviewer image could not be downloaded.");
             status.textContent = `Flare time ${event.date} ${event.time} UTC · image ${data.imageAt} UTC`;
         } catch (error) {
-            if (error.name === "AbortError" || currentRequest !== requestId) return;
+            if (currentRequest !== requestId) return;
             console.error("Unable to load Helioviewer image for NOAA flare.", error);
             status.textContent = error.message;
+            link.hidden = true;
+            image.hidden = true;
         } finally {
             if (currentRequest === requestId) {
                 panel.setAttribute("aria-busy", "false");
-                controller = null;
                 settleImageLoad = null;
             }
         }
@@ -1037,16 +1101,22 @@ function createNoaaFlareImagePlayer() {
     return {
         setEvents(data, events) {
             flares = events.filter((event) => event.type === "FLR");
-            panel.setAttribute("aria-busy", "false");
+            imageCache.clear();
+            imageErrors.clear();
             count.textContent = `0 / ${flares.length} flares`;
             if (flares.length === 0) {
+                panel.setAttribute("aria-busy", "false");
                 title.textContent = "NOAA flare images";
                 status.textContent = "No C-class or stronger flares were detected in this 7-day window.";
                 caption.textContent = `${data.startDate} to ${data.endDate}`;
                 return;
             }
+            link.hidden = true;
+            image.hidden = true;
+            panel.setAttribute("aria-busy", "true");
             status.textContent =
-                `${data.startDate} to ${data.endDate} · images follow the GOES timeline`;
+                `${data.startDate} to ${data.endDate} · loading all ${flares.length} matching images before playback`;
+            preloadPromise = preloadAllImages();
         },
         showEvent,
         setError(message) {
