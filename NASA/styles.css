@@ -357,6 +357,8 @@ p {
 .timeline-player-goes .timeline-controls {
     position: static;
     grid-column: 1 / -1;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "play restart . speed";
 }
 
 .goes-timeline-visual {
@@ -623,6 +625,11 @@ p {
         grid-template-areas:
             "play restart speed"
             "scrubber scrubber scrubber";
+    }
+
+    .timeline-player-goes .timeline-controls {
+        grid-template-columns: auto auto minmax(0, 1fr);
+        grid-template-areas: "play restart speed";
     }
 
     .timeline-control-speed {

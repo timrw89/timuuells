@@ -604,6 +604,7 @@ function createTimelinePlayer({
     colors,
     labels,
     types,
+    verticalOffset = 0,
     describe,
     onDataLoaded,
     onLoadError,
@@ -746,7 +747,7 @@ function createTimelinePlayer({
 
     function eventY(type, height) {
         const lane = Math.max(0, types.indexOf(type));
-        return height * .52 + (lane - (types.length - 1) / 2) * 70;
+        return height * (.52 + verticalOffset) + (lane - (types.length - 1) / 2) * 70;
     }
 
     function showEvent(index) {
@@ -761,7 +762,7 @@ function createTimelinePlayer({
             : labels[event.type] || event.type;
         badge.style.color = eventColor(event);
         detail.textContent = event.detail;
-        scrubber.value = String(index);
+        if (scrubber) scrubber.value = String(index);
         if (flareImagePanel) loadFlareImage(event);
         const request = ++selectionRequest;
         const imageLoad = onEventSelected
@@ -874,35 +875,39 @@ function createTimelinePlayer({
                 : [];
             if (onDataLoaded) onDataLoaded(data, events);
             if (events.length === 0) {
-                rangeLabel.textContent = data.emptyMessage || "No timeline events were returned.";
+                if (rangeLabel) {
+                    rangeLabel.textContent = data.emptyMessage || "No timeline events were returned.";
+                }
                 player.setAttribute("aria-busy", "false");
                 playButton.disabled = true;
                 restartButton.disabled = true;
-                scrubber.disabled = true;
+                if (scrubber) scrubber.disabled = true;
                 speedSelect.disabled = true;
                 return;
             }
 
             minTimestamp = events[0].timestamp;
             maxTimestamp = events[events.length - 1].timestamp;
-            scrubber.max = String(events.length - 1);
-            rangeLabel.textContent = describe(data, events);
+            if (scrubber) {
+                scrubber.max = String(events.length - 1);
+                scrubber.disabled = false;
+            }
+            if (rangeLabel) rangeLabel.textContent = describe(data, events);
             player.setAttribute("aria-busy", "false");
             playButton.disabled = false;
             restartButton.disabled = false;
-            scrubber.disabled = false;
             speedSelect.disabled = false;
             resize();
             showEvent(0);
             window.requestAnimationFrame(render);
         } catch (error) {
             console.error(`Unable to load timeline from ${endpoint}.`, error);
-            rangeLabel.textContent = error.message;
+            if (rangeLabel) rangeLabel.textContent = error.message;
             if (onLoadError) onLoadError(error);
             player.setAttribute("aria-busy", "false");
             playButton.disabled = true;
             restartButton.disabled = true;
-            scrubber.disabled = true;
+            if (scrubber) scrubber.disabled = true;
             speedSelect.disabled = true;
         }
     }
@@ -919,11 +924,13 @@ function createTimelinePlayer({
         playbackIndex = 0;
         showEvent(0);
     });
-    scrubber.addEventListener("input", () => {
-        playing = false;
-        playButton.textContent = "Play";
-        showEvent(Number(scrubber.value));
-    });
+    if (scrubber) {
+        scrubber.addEventListener("input", () => {
+            playing = false;
+            playButton.textContent = "Play";
+            showEvent(Number(scrubber.value));
+        });
+    }
     speedSelect.addEventListener("change", () => {
         stepInterval = Number(speedSelect.value);
     });
@@ -1130,6 +1137,7 @@ const noaaFlareImagePlayer = createNoaaFlareImagePlayer();
 createTimelinePlayer({
     prefix: "swpc-timeline",
     endpoint: "/api/noaa-flares",
+    verticalOffset: .08,
     colors: {
         FLR: "#7ce8ff",
         "FLR:C": "#7ce8ff",
