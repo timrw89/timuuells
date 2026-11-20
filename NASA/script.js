@@ -947,8 +947,14 @@ function createNoaaFlareImagePlayer() {
     function setError(message) {
         window.clearTimeout(imageTimer);
         if (controller) controller.abort();
+        if (settleImageLoad) {
+            settleImageLoad(false);
+            settleImageLoad = null;
+        }
         requestId += 1;
         panel.setAttribute("aria-busy", "false");
+        link.hidden = true;
+        image.hidden = true;
         status.textContent = message;
         playButton.disabled = true;
         previousButton.disabled = true;
