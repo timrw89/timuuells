@@ -470,15 +470,9 @@ p {
     color: var(--color-ink);
 }
 
-.flare-image-controls {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: .45rem;
-    margin-top: 1rem;
-}
-
-.flare-image-controls > span {
+.flare-image-count {
+    display: block;
+    margin-top: .35rem;
     color: var(--color-muted);
     font-size: .74rem;
 }

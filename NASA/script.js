@@ -606,7 +606,8 @@ function createTimelinePlayer({
     types,
     describe,
     onDataLoaded,
-    onLoadError
+    onLoadError,
+    onEventSelected
 }) {
     const element = (suffix) => document.querySelector(`#${prefix}-${suffix}`);
     const player = element("player");
@@ -632,6 +633,8 @@ function createTimelinePlayer({
     let lastStepTime = 0;
     let playbackIndex = 0;
     let selectedIndex = -1;
+    let selectionRequest = 0;
+    let selectionPending = false;
     let minTimestamp = 0;
     let maxTimestamp = 1;
     let stars = [];
@@ -760,6 +763,24 @@ function createTimelinePlayer({
         detail.textContent = event.detail;
         scrubber.value = String(index);
         if (flareImagePanel) loadFlareImage(event);
+        const request = ++selectionRequest;
+        const imageLoad = onEventSelected
+            ? onEventSelected(event, index, events.length)
+            : null;
+        selectionPending = Boolean(imageLoad && typeof imageLoad.then === "function");
+        if (selectionPending) {
+            Promise.resolve(imageLoad)
+                .catch((error) => {
+                    console.error("Unable to load the image for the selected timeline event.", error);
+                })
+                .finally(() => {
+                    if (request !== selectionRequest) return;
+                    selectionPending = false;
+                    lastStepTime = window.performance.now();
+                });
+        } else {
+            lastStepTime = window.performance.now();
+        }
 
         const bounds = canvas.getBoundingClientRect();
         const margin = Math.min(60, bounds.width * .08);
@@ -780,7 +801,7 @@ function createTimelinePlayer({
         if (!bounds.width || !bounds.height) return;
         const context = canvas.getContext("2d");
 
-        if (playing && events.length && now - lastStepTime >= stepInterval) {
+        if (playing && events.length && !selectionPending && now - lastStepTime >= stepInterval) {
             showEvent(playbackIndex);
             lastStepTime = now;
         }
@@ -889,6 +910,7 @@ function createTimelinePlayer({
     playButton.addEventListener("click", () => {
         playing = !playing;
         playButton.textContent = playing ? "Pause" : "Play";
+        if (playing) lastStepTime = window.performance.now();
         if (!playing && selectedIndex >= 0) loadFlareImage(events[selectedIndex]);
     });
     restartButton.addEventListener("click", () => {
@@ -919,33 +941,15 @@ function createNoaaFlareImagePlayer() {
     const link = element("link");
     const image = element("element");
     const caption = element("caption");
-    const previousButton = element("previous");
-    const playButton = element("play");
-    const nextButton = element("next");
     const count = element("count");
-    const imageDelay = 3500;
 
     let flares = [];
-    let selectedIndex = 0;
-    let playing = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let requestId = 0;
     let controller = null;
-    let imageTimer = null;
     let settleImageLoad = null;
     const imageCache = new Map();
 
-    function updatePlayButton() {
-        playButton.textContent = playing ? "Pause animation" : "Play animation";
-    }
-
-    function scheduleNext() {
-        window.clearTimeout(imageTimer);
-        if (!playing || flares.length < 2) return;
-        imageTimer = window.setTimeout(() => showImage(selectedIndex + 1), imageDelay);
-    }
-
     function setError(message) {
-        window.clearTimeout(imageTimer);
         if (controller) controller.abort();
         if (settleImageLoad) {
             settleImageLoad(false);
@@ -956,14 +960,10 @@ function createNoaaFlareImagePlayer() {
         link.hidden = true;
         image.hidden = true;
         status.textContent = message;
-        playButton.disabled = true;
-        previousButton.disabled = true;
-        nextButton.disabled = true;
     }
 
-    async function showImage(index) {
-        if (flares.length === 0) return;
-        window.clearTimeout(imageTimer);
+    async function showEvent(event, index, total) {
+        if (event.type !== "FLR") return;
         if (controller) {
             controller.abort();
             controller = null;
@@ -973,15 +973,13 @@ function createNoaaFlareImagePlayer() {
             settleImageLoad = null;
         }
 
-        selectedIndex = (index + flares.length) % flares.length;
-        const event = flares[selectedIndex];
         const currentRequest = ++requestId;
         const date = new Date(event.timestamp).toISOString();
         controller = new AbortController();
         panel.setAttribute("aria-busy", "true");
         title.textContent = `${event.flareClass || "GOES"} flare`;
         status.textContent = "Finding the closest SDO/AIA image…";
-        count.textContent = `${selectedIndex + 1} / ${flares.length}`;
+        count.textContent = `${index + 1} / ${total} flares`;
         link.hidden = true;
         image.hidden = true;
 
@@ -1031,46 +1029,25 @@ function createNoaaFlareImagePlayer() {
                 panel.setAttribute("aria-busy", "false");
                 controller = null;
                 settleImageLoad = null;
-                scheduleNext();
             }
         }
     }
-
-    previousButton.addEventListener("click", () => showImage(selectedIndex - 1));
-    nextButton.addEventListener("click", () => showImage(selectedIndex + 1));
-    playButton.addEventListener("click", () => {
-        playing = !playing;
-        updatePlayButton();
-        if (playing && panel.getAttribute("aria-busy") === "false") {
-            scheduleNext();
-        } else {
-            window.clearTimeout(imageTimer);
-        }
-    });
-    updatePlayButton();
 
     return {
         setEvents(data, events) {
             flares = events.filter((event) => event.type === "FLR");
             panel.setAttribute("aria-busy", "false");
-            previousButton.disabled = flares.length < 2;
-            nextButton.disabled = flares.length < 2;
-            playButton.disabled = flares.length < 2;
-            count.textContent = flares.length ? `1 / ${flares.length}` : "0 / 0";
+            count.textContent = `0 / ${flares.length} flares`;
             if (flares.length === 0) {
-                playing = false;
-                updatePlayButton();
                 title.textContent = "NOAA flare images";
                 status.textContent = "No C-class or stronger flares were detected in this 7-day window.";
                 caption.textContent = `${data.startDate} to ${data.endDate}`;
                 return;
             }
-            playing = playing && flares.length > 1;
-            updatePlayButton();
             status.textContent =
-                `${data.startDate} to ${data.endDate} · ${flares.length} NOAA flares`;
-            showImage(0);
+                `${data.startDate} to ${data.endDate} · images follow the GOES timeline`;
         },
+        showEvent,
         setError(message) {
             setError(`Unable to load NOAA flare timestamps: ${message}`);
         }
@@ -1092,6 +1069,8 @@ createTimelinePlayer({
     types: ["FLR"],
     onDataLoaded: (data, events) => noaaFlareImagePlayer.setEvents(data, events),
     onLoadError: (error) => noaaFlareImagePlayer.setError(error.message),
+    onEventSelected: (event, index, total) =>
+        noaaFlareImagePlayer.showEvent(event, index, total),
     describe: (data) =>
         `${data.startDate} to ${data.endDate} · ${data.eventCount} C-class or stronger flares · ${formatNumber(data.sampleCount)} X-ray samples`
 });

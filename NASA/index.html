@@ -91,10 +91,10 @@
                         <input id="swpc-timeline-scrubber" type="range" min="0" max="100" value="0" disabled>
                     </label>
                     <select class="timeline-speed timeline-control-speed" id="swpc-timeline-speed" aria-label="GOES timeline playback speed" disabled>
-                        <option value="550" selected>0.5x</option>
-                        <option value="280">1x</option>
-                        <option value="120">2x</option>
-                        <option value="50">5x</option>
+                        <option value="8000">0.5x</option>
+                        <option value="4000" selected>1x</option>
+                        <option value="2000">2x</option>
+                        <option value="800">5x</option>
                     </select>
                 </div>
             </div>
@@ -103,12 +103,7 @@
                     <p class="section-index">HELIOVIEWER / MATCHED TO NOAA GOES</p>
                     <h3 id="swpc-flare-image-title">NOAA flare images</h3>
                     <p id="swpc-flare-image-status" role="status" aria-live="polite">Loading NOAA flare timestamps…</p>
-                    <div class="flare-image-controls">
-                        <button class="refresh-button" id="swpc-flare-image-previous" type="button" disabled>Previous</button>
-                        <button class="refresh-button" id="swpc-flare-image-play" type="button" disabled>Play animation</button>
-                        <button class="refresh-button" id="swpc-flare-image-next" type="button" disabled>Next</button>
-                        <span id="swpc-flare-image-count" aria-live="polite">0 / 0</span>
-                    </div>
+                    <span class="flare-image-count" id="swpc-flare-image-count" aria-live="polite">Loading flare sequence…</span>
                 </div>
                 <figure class="flare-image-figure">
                     <a id="swpc-flare-image-link" target="_blank" rel="noopener noreferrer" hidden>
